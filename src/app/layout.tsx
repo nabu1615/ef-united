@@ -1,6 +1,10 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
+import { esES } from "@clerk/localizations";
+import { ClerkLoaded, ClerkLoading, ClerkProvider } from '@clerk/nextjs'
+import { dark } from "@clerk/themes";
+import Loader from '@/components/Loader';
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -16,7 +20,24 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <main>
+          <ClerkProvider localization={esES} appearance={{
+            elements: {
+              footer: "hidden"
+            },
+            baseTheme: dark
+          }}>
+            <ClerkLoading>
+              <Loader />
+            </ClerkLoading>
+            <ClerkLoaded>
+              {children}
+            </ClerkLoaded>
+
+          </ClerkProvider>
+        </main>
+      </body>
     </html>
   )
 }
