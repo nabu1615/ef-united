@@ -22,6 +22,24 @@ export const getPersonInfo = async (email: string) => {
                     image {
                         url
                     }
+                    md3S {
+                        matches {
+                            homeScore
+                            homeTeam {
+                                name
+                                image {
+                                    url
+                                }
+                            }
+                            awayScore
+                            awayTeam {
+                                name
+                                image {
+                                    url
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
