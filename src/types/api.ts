@@ -16,10 +16,10 @@ export interface Match {
 }
 
 export interface Team {
+    id: string
     name: string
     image: {
         url: string
     }
     md3S: Md3[]
-
 }

@@ -1,4 +1,4 @@
-import { Person } from "@/types/api";
+import { Person, Team } from "@/types/api";
 import { GraphQLClient, gql, request } from "graphql-request";
 
 const endpoint = process.env.HYGRAPH_ENDPOINT || '';
@@ -18,6 +18,7 @@ export const getPersonInfo = async (email: string) => {
                 id
                 name
                 team {
+                    id
                     name
                     image {
                         url
@@ -54,4 +55,27 @@ export const getPersonInfo = async (email: string) => {
         console.error(error);
     }
 
+}
+
+export const getTeams = async () => {
+    const teamsQuery = gql`
+    query TeamsUnlessUser {
+        teams {
+            id
+            name
+            image {
+                url
+            }
+        }
+    }
+    `
+
+    try {
+        const data: { teams: Team[] } = await request(endpoint, teamsQuery);
+
+        return data.teams;
+
+    } catch (error) {
+        console.error(error);
+    }
 }
