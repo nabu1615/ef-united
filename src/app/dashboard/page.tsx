@@ -5,6 +5,7 @@ import React, { Fragment, useEffect } from 'react'
 import { currentUser, clerkClient } from '@clerk/nextjs';
 import Md3List from '@/components/Md3List';
 import { Match, Md3 } from '@/types/api';
+import CreateMd3 from '@/components/CreateMd3';
 
 const Dashboard = async () => {
     const userInfo = await currentUser();
@@ -24,6 +25,8 @@ const Dashboard = async () => {
             <div className='my-2'>Bievenido</div>
             <User user={user} />
             <h2 className='my-4 font-bold'>Ultimos MD3</h2>
+
+            <CreateMd3 />
 
             {teams && teams.map((team: any) => {
 
