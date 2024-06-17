@@ -1,17 +1,27 @@
 "use client";
 
-import React, { Fragment } from "react";
+import React from "react";
 import { SignIn } from "@clerk/nextjs";
+import { Zen_Dots } from "next/font/google";
+
+const zenDots = Zen_Dots({
+  subsets: ["latin"],
+  weight: "400",
+});
 
 function Login() {
   return (
-    <Fragment>
-      <p className="mb-8">
-        <span className="text-5xl mx-2">🏆</span>
-        <span className="ef-title text-5xl  font-bold">ef united</span>
-      </p>
-      <SignIn />
-    </Fragment>
+    <div className="min-h-screen w-full flex justify-center flex-col items-center bg-yellow-950">
+      <div>
+        <p className="bg-white pt-8 pb-0 relative top-8 z-10 rounded-lg text-center text-3xl">
+          <span className="mx-2 mb-2 text-xl block">🎮 🏆 ⚽️</span>
+          <p className={`ef-title text-slate-700 ${zenDots.className}`}>
+            EF United
+          </p>
+        </p>
+        <SignIn />
+      </div>
+    </div>
   );
 }
 

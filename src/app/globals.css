@@ -33,6 +33,7 @@
     --ring: 222.2 84% 4.9%;
 
     --radius: 0.5rem;
+    --yellow-950: 67, 96%, 72%;
   }
 
   .dark {
@@ -73,4 +74,16 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+[class^="cl-internal-"] {
+  /* Pone el texto en negrita */
+}
+
+.cl-card {
+  margin: 0;
+}
+
+.cl-headerTitle {
+  display: none;
 }

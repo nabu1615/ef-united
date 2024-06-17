@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { ClerkLoaded, ClerkLoading, ClerkProvider } from "@clerk/nextjs";
-import { dark } from "@clerk/themes";
 import { esES } from "@/utils/login-localization-es";
 
 // Components
@@ -26,7 +25,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <main className="flex min-h-screen flex-col items-center p-24">
+        <main className="flex flex-col items-center min-h-screen justify-center">
           <ClerkProvider
             localization={esES}
             appearance={{
@@ -34,8 +33,8 @@ export default function RootLayout({
                 footer: "hidden",
                 form: "hidden",
                 dividerText: "hidden",
+                dividerRow: "hidden",
               },
-              baseTheme: dark,
             }}
           >
             <ClerkLoading>

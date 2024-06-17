@@ -286,7 +286,8 @@ const CreateMd3 = ({ user, teams }: { user: Person; teams: Team[] }) => {
                               <RadioGroupItem value="home" />
                             </FormControl>
                             <FormLabel className="font-normal">
-                              {team?.name}
+                              {team?.name} Ganá por penales / Rival no pone
+                              penales
                             </FormLabel>
                           </FormItem>
                           <FormItem className="flex items-center space-x-3 space-y-0">
@@ -294,7 +295,8 @@ const CreateMd3 = ({ user, teams }: { user: Person; teams: Team[] }) => {
                               <RadioGroupItem value="away" />
                             </FormControl>
                             <FormLabel className="font-normal">
-                              {awayTeam || "Equipo Rival"}
+                              {awayTeam || "Equipo Rival"} Ganá por penales / No
+                              pongo penales
                             </FormLabel>
                           </FormItem>
                         </RadioGroup>
