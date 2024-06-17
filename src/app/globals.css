@@ -87,3 +87,11 @@
 .cl-headerTitle {
   display: none;
 }
+
+.cl-header .cl-headerSubtitle {
+  color: #64748b;
+  margin: 14px 0px 0px 0px;
+  font-size: 0.9rem;
+  font-weight: 300;
+  line-height: 1.65;
+}
