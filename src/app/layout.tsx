@@ -25,7 +25,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <main className="flex flex-col items-center min-h-screen justify-center">
+        <main className="flex flex-col items-center min-h-screen">
           <ClerkProvider
             localization={esES}
             appearance={{
@@ -37,9 +37,12 @@ export default function RootLayout({
               },
             }}
           >
-            <ClerkLoading>
-              <Loader />
-            </ClerkLoading>
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+              <ClerkLoading>
+                <Loader />
+              </ClerkLoading>
+            </div>
+
             <ClerkLoaded>{children}</ClerkLoaded>
           </ClerkProvider>
         </main>

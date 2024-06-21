@@ -1,17 +1,13 @@
-import { User } from "@/components/User";
-import { getPersonInfo, getTeams } from "@/utils/api";
-import { auth, useUser } from "@clerk/nextjs";
-import React, { Fragment, useEffect } from "react";
-import { currentUser, clerkClient } from "@clerk/nextjs";
+import { getTeams } from "@/utils/api";
+import React, { Fragment } from "react";
 import Md3List from "@/components/Md3List";
-import { Match, Md3, Team } from "@/types/api";
+import { Md3, Team } from "@/types/api";
 import CreateMd3 from "@/components/CreateMd3";
+import { getUser } from "@/server/get-user";
 
 const Dashboard = async () => {
-  const userInfo = await currentUser();
-  const email = userInfo?.emailAddresses[0]?.emailAddress;
-  const user = await getPersonInfo(email!);
-  const md3s = user?.team?.md3S;
+  const user = await getUser();
+  const md3s = user?.team?.md3S as Md3[];
   const teams = (await getTeams()) as Team[];
 
   if (!user) {
@@ -20,15 +16,17 @@ const Dashboard = async () => {
 
   return (
     <Fragment>
-      <div className="my-2">Bievenido</div>
-      <User user={user} />
-      <CreateMd3 user={user} teams={teams} />
-      <h2 className="my-4 font-bold">Ultimos MD3</h2>
+      <div className="bg-slate-100 px-6 rounded-xl w-3/4 py-8">
+        <div className="flex w-full justify-between items-center mb-10">
+          <h2 className="my-4">🎮️ Ultimos Partidos Jugados</h2>
+          <CreateMd3 user={user} teams={teams} />
+        </div>
 
-      {md3s &&
-        md3s.map((md3: Md3, index: number) => {
-          return <Md3List key={index} md3s={md3} />;
-        })}
+        {md3s &&
+          md3s.map((md3: Md3, index: number) => {
+            return <Md3List key={index} md3s={md3} />;
+          })}
+      </div>
     </Fragment>
   );
 };

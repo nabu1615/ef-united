@@ -31,7 +31,7 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Person, Team } from "@/types/api";
+import { User, Team } from "@/types/api";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -65,7 +65,7 @@ const FormSchemaBase = z.object({
   penals: z.enum(["home", "away"]).optional(),
 });
 
-const CreateMd3 = ({ user, teams }: { user: Person; teams: Team[] }) => {
+const CreateMd3 = ({ user, teams }: { user: User; teams: Team[] }) => {
   const [formSchema, setFormSchema] = useState(FormSchemaBase);
   // @ts-ignore
   const resolver = new zodResolver(formSchema);
@@ -82,8 +82,6 @@ const CreateMd3 = ({ user, teams }: { user: Person; teams: Team[] }) => {
   const [awayScore, setAwayScore] = useState();
   const [showPenals, setShowPenals] = useState(false);
   const [md3Done, setMd3Done] = useState(false);
-
-  console.log(matches);
 
   const penalsRequired = () => {
     if (showPenals) {
@@ -116,7 +114,7 @@ const CreateMd3 = ({ user, teams }: { user: Person; teams: Team[] }) => {
 
   useEffect(() => {
     penalsRequired();
-  }, [showPenals]);
+  }, [showPenals, penalsRequired]);
 
   useEffect(() => {
     let homeWon = 0;
@@ -162,7 +160,7 @@ const CreateMd3 = ({ user, teams }: { user: Person; teams: Team[] }) => {
 
   return (
     <Dialog>
-      <DialogTrigger>
+      <DialogTrigger asChild>
         <Button>Registrar MD3</Button>
       </DialogTrigger>
       <DialogContent>

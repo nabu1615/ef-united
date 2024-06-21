@@ -95,3 +95,7 @@
   font-weight: 300;
   line-height: 1.65;
 }
+
+.match-columns {
+  grid-template-columns: 40% auto 40%;
+}
