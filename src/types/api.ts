@@ -13,6 +13,7 @@ export interface Match {
   homeTeam: Team;
   awayScore: number;
   awayTeam: Team;
+  penals?: string;
 }
 
 export interface Team {

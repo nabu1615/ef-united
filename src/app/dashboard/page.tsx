@@ -16,7 +16,7 @@ const Dashboard = async () => {
 
   return (
     <Fragment>
-      <div className="bg-slate-100 px-6 rounded-xl w-3/4 py-8">
+      <div className="bg-slate-100 px-6 rounded-xl w-full md:w-3/4 py-8">
         <div className="flex w-full justify-between items-center mb-10">
           <h2 className="my-4">🎮️ Ultimos Partidos Jugados</h2>
           <CreateMd3 user={user} teams={teams} />

@@ -97,5 +97,15 @@
 }
 
 .match-columns {
-  grid-template-columns: 40% auto 40%;
+  grid-template-columns: 32% auto 32%;
+}
+
+@media (min-width: 768px) {
+  .match-columns {
+    grid-template-columns: 40% auto 40%;
+  }
+}
+
+.form-score {
+  grid-template-columns: 42% auto 42%;
 }

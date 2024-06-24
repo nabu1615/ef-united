@@ -27,6 +27,7 @@ export const getPersonInfo = async (email: string) => {
                         matches {
                             homeScore
                             homeTeam {
+                                id
                                 name
                                 image {
                                     url
@@ -34,11 +35,13 @@ export const getPersonInfo = async (email: string) => {
                             }
                             awayScore
                             awayTeam {
+                                id
                                 name
                                 image {
                                     url
                                 }
                             }
+                            penals
                         }
                     }
                 }
@@ -72,6 +75,27 @@ export const getTeams = async () => {
     const data: { teams: Team[] } = await request(endpoint, teamsQuery);
 
     return data.teams;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export const getPeople = async () => {
+  const peopleQuery = gql`
+    query People {
+      people {
+        name
+        team {
+          id
+          name
+        }
+      }
+    }
+  `;
+
+  try {
+    const data: { people: User[] } = await request(endpoint, peopleQuery);
+    return data.people;
   } catch (error) {
     console.error(error);
   }
