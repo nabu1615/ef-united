@@ -58,7 +58,7 @@ const Md3List = async ({ md3s: { matches } }: { md3s: Md3 }) => {
       {
         <Badge
           className="absolute -top-2 -left-2"
-          variant={whoWon() ? "default" : "destructive"}
+          variant={whoWon() ? "success" : "destructive"}
         >
           {whoWon() ? "Ganado" : "Perdido"}
         </Badge>
@@ -111,7 +111,7 @@ const Md3List = async ({ md3s: { matches } }: { md3s: Md3 }) => {
               </div>
 
               {md3.penals && (
-                <Badge variant={wonInPenals ? "default" : "destructive"}>
+                <Badge variant={wonInPenals ? "success" : "destructive"}>
                   {wonInPenals ? "Ganado" : "Perdido"}
                 </Badge>
               )}

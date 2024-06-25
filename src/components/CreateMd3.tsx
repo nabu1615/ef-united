@@ -146,6 +146,12 @@ const CreateMd3 = ({ user, teams }: { user: User; teams: Team[] }) => {
     }
   }, [awayScore, homeScore]);
 
+  useEffect(() => {
+    if (md3Done) {
+      setShowMatchForm(false);
+    }
+  }, [md3Done]);
+
   const matchNumber = () => {
     switch (matches.length) {
       case 0:
@@ -230,7 +236,7 @@ const CreateMd3 = ({ user, teams }: { user: User; teams: Team[] }) => {
                       control={form.control}
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="pt-2 text-left block">
+                          <FormLabel className="pt-2 text-left block mb-4">
                             {team?.name}
                           </FormLabel>
                           <Input
@@ -251,7 +257,7 @@ const CreateMd3 = ({ user, teams }: { user: User; teams: Team[] }) => {
                       )}
                     />
                   </div>
-                  <div className="flex flex-col justify-center relative top-4">
+                  <div className="flex flex-col justify-center items-center relative top-4">
                     🆚
                   </div>
                   <div className="grid gap-1">
@@ -260,7 +266,7 @@ const CreateMd3 = ({ user, teams }: { user: User; teams: Team[] }) => {
                       control={form.control}
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="pt-2 text-left block">
+                          <FormLabel className="pt-2 text-left block mb-4">
                             {awayTeam || "Equipo Rival"}
                           </FormLabel>
                           <Input
@@ -331,10 +337,9 @@ const CreateMd3 = ({ user, teams }: { user: User; teams: Team[] }) => {
               </div>
               <div className="flex justify-end">
                 <Button
-                  disabled={md3Done}
                   variant="action"
                   type="submit"
-                  className="my-4"
+                  className={"mt-4" + (md3Done ? " hidden" : " block")}
                   size="sm"
                 >
                   Siguiente Partido
@@ -342,14 +347,18 @@ const CreateMd3 = ({ user, teams }: { user: User; teams: Team[] }) => {
               </div>
             </form>
           </Form>
-          <div className="hidden">
-            <div className="grid gap-2">
-              <Label htmlFor="evidence">Subir imagenes</Label>
+          <div className={md3Done ? "block" : "hidden"}>
+            <div className="grid gap-2 bg-slate-100 mb-6 rounded-md p-4">
+              <Label className="pb-3" htmlFor="evidence">
+                Cargar Imagenes
+              </Label>
               <Input type="file" id="evidence" />
             </div>
-            <Button type="submit" className="w-full" disabled>
-              Guardar MD3
-            </Button>
+            <div className="flex justify-end">
+              <Button type="submit" disabled>
+                Guardar MD3
+              </Button>
+            </div>
           </div>
         </DialogHeader>
       </DialogContent>
