@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 import {
   Dialog,
@@ -85,7 +85,7 @@ const CreateMd3 = ({ user, teams }: { user: User; teams: Team[] }) => {
   const [md3Done, setMd3Done] = useState(false);
   const [showMatchForm, setShowMatchForm] = useState(false);
 
-  const penalsRequired = () => {
+  const penalsRequired = useCallback(() => {
     if (showPenals) {
       setFormSchema(
         // @ts-ignore
@@ -98,7 +98,11 @@ const CreateMd3 = ({ user, teams }: { user: User; teams: Team[] }) => {
     } else {
       setFormSchema(FormSchemaBase);
     }
-  };
+  }, [showPenals]);
+
+  useEffect(() => {
+    penalsRequired();
+  }, [penalsRequired]);
 
   function onSubmit(data: any, event: any) {
     setMatches([...matches, data]);
@@ -121,6 +125,8 @@ const CreateMd3 = ({ user, teams }: { user: User; teams: Team[] }) => {
   useEffect(() => {
     let homeWon = 0;
     let awayWon = 0;
+
+    console.log(matches, "matches");
 
     if (matches.length >= 2) {
       matches.forEach((match: any) => {
