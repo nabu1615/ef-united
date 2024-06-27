@@ -85,7 +85,6 @@ const CreateMd3 = ({ user, teams }: { user: User; teams: Team[] }) => {
   const [md3Done, setMd3Done] = useState(false);
   const [showMatchForm, setShowMatchForm] = useState(false);
   const [createMd3Loader, setCreateMd3Loader] = useState(false);
-  const [md3Status, setMd3Status] = useState("");
   const [open, setOpen] = useState(false);
 
   const penalsRequired = useCallback(() => {
@@ -230,7 +229,6 @@ const CreateMd3 = ({ user, teams }: { user: User; teams: Team[] }) => {
       createMatch(matches, user)
         .then(async (responses) => {
           // cerrar dialog
-          setMd3Status("success");
           console.log("All matches created successfully", responses);
 
           // Crear el MD3
@@ -450,14 +448,31 @@ const CreateMd3 = ({ user, teams }: { user: User; teams: Team[] }) => {
                   </Alert>
                 )}
               </div>
-              <div className="flex justify-end">
+              <div
+                className={
+                  "flex items-center" +
+                  " justify-" +
+                  (matches.length >= 1 ? "between" : "end")
+                }
+              >
+                {matches.length >= 1 && (
+                  <Button
+                    className="mt-4"
+                    variant="destructive"
+                    onClick={() => {
+                      form.reset();
+                      setMatches([]);
+                    }}
+                  >
+                    Empezar de nuevo
+                  </Button>
+                )}
                 <Button
                   variant="action"
                   type="submit"
                   className={"mt-4" + (md3Done ? " hidden" : " block")}
-                  size="sm"
                 >
-                  Siguiente Partido
+                  {matches.length >= 2 ? "Registrar Md3" : "Siguiente Partido"}
                 </Button>
               </div>
             </form>
