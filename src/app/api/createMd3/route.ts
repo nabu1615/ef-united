@@ -2,10 +2,11 @@ import { NextResponse } from "next/server";
 import { GraphQLClient } from "graphql-request";
 
 const CREATE_MD3_MUTATION = `
-  mutation createMd3($matches: [MatchWhereUniqueInput!]!, $teams: [TeamWhereUniqueInput!]!) {
+  mutation createMd3($matches: [MatchWhereUniqueInput!]!, $teams: [TeamWhereUniqueInput!]!, $evidence: [AssetWhereUniqueInput!]!) {
     createMd3(data: {
       matches: { connect: $matches }, 
-      teams: { connect: $teams }
+      teams: { connect: $teams },
+      evidence: { connect: $evidence }
     }) {
       teams {
         id
@@ -18,7 +19,7 @@ const CREATE_MD3_MUTATION = `
 `;
 
 export async function POST(request: Request) {
-  const { matches, teams } = await request.json();
+  const { matches, teams, evidence } = await request.json();
 
   const graphQLEndpoint = process.env.HYGRAPH_ENDPOINT || "";
   const token = process.env.HYGRAPH_TOKEN || "";
@@ -29,14 +30,15 @@ export async function POST(request: Request) {
 
   try {
     // Crear el md3
-
-    await graphcms.request(CREATE_MD3_MUTATION, {
+    const createMd3Response: any = await graphcms.request(CREATE_MD3_MUTATION, {
       matches: matches,
       teams: teams,
+      evidence: evidence,
     });
 
     return NextResponse.json({
       message: "Md3 creado",
+      teams: createMd3Response.createMd3.teams,
     });
   } catch (error) {
     console.error("Error creando el MD3", error);

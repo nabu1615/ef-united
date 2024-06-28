@@ -4,11 +4,8 @@ import { GraphQLClient, gql, request } from "graphql-request";
 const endpoint = process.env.HYGRAPH_ENDPOINT || "";
 const token = process.env.HYGRAPH_TOKEN || "";
 
-const graphQLClient = new GraphQLClient(endpoint, {
-  headers: {
-    Authorization: `Bearer ${token}`,
-    "content-type": "application/json",
-  },
+const graphcms = new GraphQLClient(endpoint, {
+  headers: { Authorization: `Bearer ${token}` },
 });
 
 export const getPersonInfo = async (email: string) => {
@@ -95,8 +92,38 @@ export const getPeople = async () => {
 
   try {
     const data: { people: User[] } = await request(endpoint, peopleQuery);
+
     return data.people;
   } catch (error) {
     console.error(error);
   }
+};
+
+export const publishAsset = async (id: string) => {
+  const mutation = gql`
+  mutation {
+    publishAsset(where: {id: "${id}"}, to: PUBLISHED) {
+      id
+    }
+  }
+  `;
+  const result = await graphcms.request(mutation, {
+    id,
+  });
+
+  return result;
+};
+
+export const createAsset = async () => {
+  const mutation = gql`
+    mutation createAsset {
+      createAsset(data: {}) {
+        id
+        url
+      }
+    }
+  `;
+  const result = await graphcms.request(mutation);
+
+  return result;
 };

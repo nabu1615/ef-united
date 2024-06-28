@@ -11,7 +11,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "./ui/button";
-import { Label } from "./ui/label";
 import { Input } from "@/components/ui/input";
 
 import {
@@ -36,8 +35,11 @@ import { User, Team } from "@/types/api";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Alert } from "./ui/alert";
 import Loader from "./Loader";
+import { UploadFile } from "./UploadFile";
+import { Toast } from "@radix-ui/react-toast";
+import { useToast } from "./ui/use-toast";
+import { Toaster } from "./ui/toaster";
 
 const formErrors = {
   away_team: "Selecciona un equipo",
@@ -77,7 +79,10 @@ const CreateMd3 = ({ user, teams }: { user: User; teams: Team[] }) => {
 
   const team = user.team;
   const filteredTeams: Team[] = teams.filter((t) => t.id !== team?.id);
-  const [awayTeam, setAwayTeam] = useState("");
+  const [awayTeam, setAwayTeam] = useState({
+    name: "",
+    id: "",
+  });
   const [matches, setMatches]: any = useState([]);
   const [homeScore, setHomeScore] = useState();
   const [awayScore, setAwayScore] = useState();
@@ -86,6 +91,8 @@ const CreateMd3 = ({ user, teams }: { user: User; teams: Team[] }) => {
   const [showMatchForm, setShowMatchForm] = useState(false);
   const [createMd3Loader, setCreateMd3Loader] = useState(false);
   const [open, setOpen] = useState(false);
+  const [uploadedFileId, setUploadedFileId] = useState([]);
+  const { toast } = useToast();
 
   const penalsRequired = useCallback(() => {
     if (showPenals) {
@@ -105,6 +112,23 @@ const CreateMd3 = ({ user, teams }: { user: User; teams: Team[] }) => {
   useEffect(() => {
     penalsRequired();
   }, [penalsRequired]);
+
+  const resetForm = (data?: any) => {
+    if (data) {
+      form.reset({
+        ...data,
+        away_score: "",
+        home_score: "",
+        penals: undefined,
+      });
+    } else {
+      form.reset();
+      setMatches([]);
+    }
+
+    setAwayScore(undefined);
+    setHomeScore(undefined);
+  };
 
   function onSubmit(data: any, event: any) {
     setMatches([...matches, data]);
@@ -156,7 +180,7 @@ const CreateMd3 = ({ user, teams }: { user: User; teams: Team[] }) => {
     }
   }, [awayScore, homeScore]);
 
-  const createMd3 = async (matches: any, teams: any) => {
+  const createMd3 = async (matches: any, teams: any, evidence: any) => {
     const response = await fetch("/api/createMd3", {
       method: "POST",
       headers: {
@@ -165,6 +189,7 @@ const CreateMd3 = ({ user, teams }: { user: User; teams: Team[] }) => {
       body: JSON.stringify({
         matches,
         teams,
+        evidence,
       }),
     });
 
@@ -209,6 +234,7 @@ const CreateMd3 = ({ user, teams }: { user: User; teams: Team[] }) => {
         }
 
         const responseData = await response.json();
+
         responses.push(responseData);
 
         // Esperar un segundo antes de la siguiente solicitud
@@ -226,47 +252,62 @@ const CreateMd3 = ({ user, teams }: { user: User; teams: Team[] }) => {
     if (md3Done) {
       setShowMatchForm(false);
 
-      createMatch(matches, user)
-        .then(async (responses) => {
-          // cerrar dialog
-          console.log("All matches created successfully", responses);
+      if (uploadedFileId.length > 0) {
+        createMatch(matches, user)
+          .then(async (responses) => {
+            // Crear el MD3
+            const matchesIds = responses.map((response) => {
+              return {
+                id: response.matchId,
+              };
+            });
 
-          // Crear el MD3
+            const teamsIds = [
+              {
+                id: user.team.id,
+              },
+              {
+                id: awayTeam.id,
+              },
+            ];
 
-          const matches = responses.map((response) => {
-            return {
-              id: response.matchId,
-            };
+            try {
+              const md3Response = await createMd3(
+                matchesIds,
+                teamsIds,
+                uploadedFileId
+              );
+              console.log("MD3 created successfully", md3Response);
+
+              setCreateMd3Loader(false);
+            } catch (error) {
+              console.log("Error creating MD3:", error);
+            }
+
+            setMd3Done(false);
+            setUploadedFileId([]);
+            setOpen(false);
+            setMatches([]);
+            setAwayTeam({
+              id: "",
+              name: "",
+            });
+            form.reset();
+            setAwayScore(undefined);
+            setHomeScore(undefined);
+            toast({
+              title: "Md3 creado con éxito",
+              description:
+                "Uno de los administradores aprobara tu MD3, ¡gracias!",
+              variant: "success",
+            });
+          })
+          .catch((error) => {
+            console.error("Error creating one or more matches:", error);
           });
-
-          const teams = [
-            {
-              id: responses[0].homeTeamId,
-            },
-            {
-              id: responses[0].awayTeamId,
-            },
-          ];
-
-          try {
-            const md3Response = await createMd3(matches, teams);
-            console.log("MD3 created successfully", md3Response);
-
-            setCreateMd3Loader(false);
-          } catch (error) {
-            console.log("Error creating MD3:", error);
-          }
-
-          setOpen(false);
-          form.reset();
-          setAwayScore(undefined);
-          setHomeScore(undefined);
-        })
-        .catch((error) => {
-          console.error("Error creating one or more matches:", error);
-        });
+      }
     }
-  }, [md3Done, matches]);
+  }, [md3Done, matches, uploadedFileId]);
 
   const matchNumber = () => {
     switch (matches.length) {
@@ -283,224 +324,217 @@ const CreateMd3 = ({ user, teams }: { user: User; teams: Team[] }) => {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button>Registrar MD3</Button>
-      </DialogTrigger>
-      <DialogContent className="w-[95%]">
-        <DialogHeader>
-          <DialogTitle className="text-left">
-            📝 Registra un nuevo MD3
-          </DialogTitle>
-          <DialogDescription className="py-2 text-left my-4">
-            Porfavor selecciona el rival y el resultado de los partidos.
-          </DialogDescription>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)}>
-              {matches.length < 1 && (
-                <div className="grid gap-2">
-                  <FormField
-                    control={form.control}
-                    name="away_team"
-                    render={({ field }) => (
-                      <FormItem className="my-3">
-                        <FormLabel className="py-2 text-left w-full block">
-                          Selecciona equipo rival
-                        </FormLabel>
-                        <Select
-                          onValueChange={(value) => {
-                            field.onChange(value);
-                            setAwayTeam(getTeamName(value));
-                            setShowMatchForm(true);
-                          }}
-                          disabled={matches.length > 0}
-                          defaultValue={field.value}
-                          value={field.value}
-                        >
+    <React.Fragment>
+      <Toaster />
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          <Button>Registrar MD3</Button>
+        </DialogTrigger>
+        <DialogContent className="w-[95%]">
+          <DialogHeader>
+            <DialogTitle className="text-left">
+              📝 Registra un nuevo MD3
+            </DialogTitle>
+            <DialogDescription className="py-2 text-left my-4">
+              Porfavor selecciona el rival y el resultado de los partidos.
+            </DialogDescription>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)}>
+                {matches.length < 1 && (
+                  <div className="grid gap-2">
+                    <FormField
+                      control={form.control}
+                      name="away_team"
+                      render={({ field }) => (
+                        <FormItem className="my-3">
+                          <FormLabel className="py-2 text-left w-full block">
+                            Selecciona equipo rival
+                          </FormLabel>
+                          <Select
+                            onValueChange={(value) => {
+                              field.onChange(value);
+                              setAwayTeam({
+                                id: value,
+                                name: getTeamName(value),
+                              });
+                              setShowMatchForm(true);
+                            }}
+                            disabled={matches.length > 0}
+                            defaultValue={field.value}
+                            value={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="---" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {filteredTeams.map((t) => (
+                                <SelectItem key={t.id} value={t.id}>
+                                  {t.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage className="text-xs" />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                )}
+
+                <div
+                  className={`${
+                    showMatchForm ? "block" : "hidden"
+                  } bg-slate-200/50 my-6 rounded-md p-4`}
+                >
+                  <h5 className="text-sm text-left font-medium mb-1 my-2">
+                    {matchNumber()} Partido
+                  </h5>
+                  <div className="grid form-score gap-4 mb-4 relative">
+                    <div className="grid gap-1">
+                      <FormField
+                        name="home_score"
+                        control={form.control}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="pt-2 text-left block mb-4">
+                              {team?.name}
+                            </FormLabel>
+                            <Input
+                              type="number"
+                              id="home-score"
+                              name="home_score"
+                              value={field.value}
+                              onChange={(value) => {
+                                field.onChange(value);
+                                setHomeScore(value.target.value as any);
+                              }}
+                              min={0}
+                            />
+                            <FormMessage className="text-xs pb-3" />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <div className="flex flex-col justify-center items-center relative top-4">
+                      🆚
+                    </div>
+                    <div className="grid gap-1">
+                      <FormField
+                        name="away_score"
+                        control={form.control}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="pt-2 text-left block mb-4">
+                              {awayTeam.name || "Equipo Rival"}
+                            </FormLabel>
+                            <Input
+                              type="number"
+                              id="away-scotr"
+                              name="away_score"
+                              value={field.value}
+                              onChange={(value) => {
+                                field.onChange(value);
+
+                                setAwayScore(value.target.value as any);
+                              }}
+                              min={0}
+                            />
+                            <FormMessage className="text-xs pb-3" />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+                  {showPenals && (
+                    <FormField
+                      control={form.control}
+                      name="penals"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm text-left font-medium flex mb-4">
+                            Penales
+                          </FormLabel>
                           <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="---" />
-                            </SelectTrigger>
+                            <RadioGroup
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                              className="flex flex-col"
+                              required={awayScore === homeScore}
+                            >
+                              <FormItem className="flex items-center space-x-3 space-y-0">
+                                <FormControl>
+                                  <RadioGroupItem value="home" />
+                                </FormControl>
+                                <FormLabel className="font-normal">
+                                  {team?.name} Ganá por penales / Rival no pone
+                                  penales
+                                </FormLabel>
+                              </FormItem>
+                              <FormItem className="flex items-center space-x-3 space-y-0">
+                                <FormControl>
+                                  <RadioGroupItem value="away" />
+                                </FormControl>
+                                <FormLabel className="font-normal">
+                                  {awayTeam.name || "Equipo Rival"} Ganá por
+                                  penales / No pongo penales
+                                </FormLabel>
+                              </FormItem>
+                            </RadioGroup>
                           </FormControl>
-                          <SelectContent>
-                            {filteredTeams.map((t) => (
-                              <SelectItem key={t.id} value={t.id}>
-                                {t.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage className="text-xs" />
-                      </FormItem>
-                    )}
-                  />
+                          <FormMessage className="text-xs pb-3" />
+                        </FormItem>
+                      )}
+                    />
+                  )}
+                </div>
+                <div
+                  className={
+                    "flex items-center" +
+                    " justify-" +
+                    (matches.length >= 1 ? "between" : "end")
+                  }
+                >
+                  {matches.length >= 1 && (
+                    <Button
+                      className={md3Done ? " hidden" : " block"}
+                      variant="destructive"
+                      onClick={() => {
+                        form.reset();
+                        setMatches([]);
+                      }}
+                    >
+                      Empezar de nuevo
+                    </Button>
+                  )}
+                  <Button
+                    variant="action"
+                    type="submit"
+                    className={md3Done ? " hidden" : " block"}
+                  >
+                    {matches.length >= 2
+                      ? "Registrar Md3"
+                      : "Siguiente Partido"}
+                  </Button>
+                </div>
+              </form>
+            </Form>
+            <div className={md3Done ? "block" : "hidden"}>
+              {!createMd3Loader && (
+                <UploadFile setUploadedFileId={setUploadedFileId} />
+              )}
+              {createMd3Loader && (
+                <div className="flex flex-col justify-center items-center">
+                  <Loader />
+                  <span className="text-sm italic my-2">Creando MD3</span>
                 </div>
               )}
-
-              <div
-                className={`${
-                  showMatchForm ? "block" : "hidden"
-                } bg-slate-200/50 my-6 rounded-md p-4`}
-              >
-                <h5 className="text-sm text-left font-medium mb-1 my-2">
-                  {matchNumber()} Partido
-                </h5>
-                <div className="grid form-score gap-4 mb-4 relative">
-                  <div className="grid gap-1">
-                    <FormField
-                      name="home_score"
-                      control={form.control}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="pt-2 text-left block mb-4">
-                            {team?.name}
-                          </FormLabel>
-                          <Input
-                            type="number"
-                            id="home-score"
-                            name="home_score"
-                            value={field.value}
-                            onChange={(value) => {
-                              field.onChange(value);
-                              setHomeScore(value.target.value as any);
-                            }}
-                            min={0}
-                          />
-                          <FormMessage className="text-xs pb-3" />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div className="flex flex-col justify-center items-center relative top-4">
-                    🆚
-                  </div>
-                  <div className="grid gap-1">
-                    <FormField
-                      name="away_score"
-                      control={form.control}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="pt-2 text-left block mb-4">
-                            {awayTeam || "Equipo Rival"}
-                          </FormLabel>
-                          <Input
-                            type="number"
-                            id="away-scotr"
-                            name="away_score"
-                            value={field.value}
-                            onChange={(value) => {
-                              field.onChange(value);
-
-                              setAwayScore(value.target.value as any);
-                            }}
-                            min={0}
-                          />
-                          <FormMessage className="text-xs pb-3" />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-                {showPenals && (
-                  <FormField
-                    control={form.control}
-                    name="penals"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-sm text-left font-medium flex mb-4">
-                          Penales
-                        </FormLabel>
-                        <FormControl>
-                          <RadioGroup
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                            className="flex flex-col"
-                            required={awayScore === homeScore}
-                          >
-                            <FormItem className="flex items-center space-x-3 space-y-0">
-                              <FormControl>
-                                <RadioGroupItem value="home" />
-                              </FormControl>
-                              <FormLabel className="font-normal">
-                                {team?.name} Ganá por penales / Rival no pone
-                                penales
-                              </FormLabel>
-                            </FormItem>
-                            <FormItem className="flex items-center space-x-3 space-y-0">
-                              <FormControl>
-                                <RadioGroupItem value="away" />
-                              </FormControl>
-                              <FormLabel className="font-normal">
-                                {awayTeam || "Equipo Rival"} Ganá por penales /
-                                No pongo penales
-                              </FormLabel>
-                            </FormItem>
-                          </RadioGroup>
-                        </FormControl>
-                        <FormMessage className="text-xs pb-3" />
-                      </FormItem>
-                    )}
-                  />
-                )}
-                {md3Done && (
-                  <Alert variant="destructive">
-                    No es necesario jugar un tercer partido
-                  </Alert>
-                )}
-              </div>
-              <div
-                className={
-                  "flex items-center" +
-                  " justify-" +
-                  (matches.length >= 1 ? "between" : "end")
-                }
-              >
-                {matches.length >= 1 && (
-                  <Button
-                    className="mt-4"
-                    variant="destructive"
-                    onClick={() => {
-                      form.reset();
-                      setMatches([]);
-                    }}
-                  >
-                    Empezar de nuevo
-                  </Button>
-                )}
-                <Button
-                  variant="action"
-                  type="submit"
-                  className={"mt-4" + (md3Done ? " hidden" : " block")}
-                >
-                  {matches.length >= 2 ? "Registrar Md3" : "Siguiente Partido"}
-                </Button>
-              </div>
-            </form>
-          </Form>
-          <div className={md3Done ? "block" : "hidden"}>
-            {/* 
-            <div className="grid gap-2 bg-slate-100 mb-6 rounded-md p-4">
-              <Label className="pb-3" htmlFor="evidence">
-                Cargar Imagenes
-              </Label>
-              <Input type="file" id="evidence" />
             </div>
-            <div className="flex justify-end">
-              <Button type="submit" disabled>
-                Guardar MD3
-              </Button>
-            </div> */}
-
-            {createMd3Loader && (
-              <div className="flex justify-center">
-                <Loader />
-                <span>Creando MD3...</span>
-              </div>
-            )}
-          </div>
-        </DialogHeader>
-      </DialogContent>
-    </Dialog>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+    </React.Fragment>
   );
 };
 
