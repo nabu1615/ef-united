@@ -76,10 +76,6 @@
   }
 }
 
-[class^="cl-internal-"] {
-  /* Pone el texto en negrita */
-}
-
 .cl-card {
   margin: 0;
 }
@@ -108,4 +104,14 @@
 
 .form-score {
   grid-template-columns: 42% auto 42%;
+}
+
+.cl-card.cl-signIn-start {
+  padding-top: 0;
+}
+
+.cl-signIn-start {
+  border-radius: 0;
+  border: 0;
+  box-shadow: none;
 }

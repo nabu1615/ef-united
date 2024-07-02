@@ -37,7 +37,6 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import Loader from "./Loader";
 import { UploadFile } from "./UploadFile";
-import { Toast } from "@radix-ui/react-toast";
 import { useToast } from "./ui/use-toast";
 import { Toaster } from "./ui/toaster";
 
@@ -57,6 +56,9 @@ const FormSchemaBase = z.object({
     })
     .min(1, {
       message: formErrors.home_score,
+    })
+    .max(2, {
+      message: "Introduce un marcador entre 0 y 99",
     }),
   away_score: z
     .string({
@@ -64,6 +66,9 @@ const FormSchemaBase = z.object({
     })
     .min(1, {
       message: formErrors.away_score,
+    })
+    .max(2, {
+      message: "Introduce un marcador entre 0 y 99",
     }),
   penals: z.enum(["home", "away"]).optional(),
 });
@@ -93,6 +98,7 @@ const CreateMd3 = ({ user, teams }: { user: User; teams: Team[] }) => {
   const [open, setOpen] = useState(false);
   const [uploadedFileId, setUploadedFileId] = useState([]);
   const { toast } = useToast();
+  const [disableScores, setDisableScores] = useState(false);
 
   const penalsRequired = useCallback(() => {
     if (showPenals) {
@@ -406,11 +412,13 @@ const CreateMd3 = ({ user, teams }: { user: User; teams: Team[] }) => {
                               id="home-score"
                               name="home_score"
                               value={field.value}
-                              onChange={(value) => {
-                                field.onChange(value);
-                                setHomeScore(value.target.value as any);
+                              disabled={showPenals}
+                              onChange={(e) => {
+                                const value = e.target.value;
+
+                                field.onChange(e);
+                                setHomeScore(value as any);
                               }}
-                              min={0}
                             />
                             <FormMessage className="text-xs pb-3" />
                           </FormItem>
@@ -431,13 +439,15 @@ const CreateMd3 = ({ user, teams }: { user: User; teams: Team[] }) => {
                             </FormLabel>
                             <Input
                               type="number"
-                              id="away-scotr"
+                              id="away-score"
                               name="away_score"
                               value={field.value}
-                              onChange={(value) => {
-                                field.onChange(value);
+                              disabled={showPenals}
+                              onChange={(e) => {
+                                const value = e.target.value;
 
-                                setAwayScore(value.target.value as any);
+                                field.onChange(e);
+                                setAwayScore(value as any);
                               }}
                               min={0}
                             />

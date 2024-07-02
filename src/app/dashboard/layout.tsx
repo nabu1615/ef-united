@@ -1,8 +1,4 @@
-import { UserButton } from "@clerk/nextjs";
-import { getPersonInfo, getTeams } from "@/utils/api";
-import React, { Fragment } from "react";
-import { currentUser } from "@clerk/nextjs";
-import { Md3, Team } from "@/types/api";
+import React from "react";
 import Header from "@/components/Header";
 
 export default async function RootLayout({

@@ -13,7 +13,7 @@ const Header = async () => {
       </div>
       <div className="w-full flex items-center justify-end">
         <span className="mr-2 text-sm font-light">Mi Perfil</span>
-        <UserButton afterSignOutUrl="/" />
+        <UserButton />
       </div>
     </header>
   );
