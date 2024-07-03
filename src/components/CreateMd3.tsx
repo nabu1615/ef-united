@@ -341,18 +341,6 @@ const CreateMd3 = ({ user, teams }: { user: User; teams: Team[] }) => {
             <DialogTitle className="text-left">
               📝 Registra un nuevo MD3
             </DialogTitle>
-            <button
-              onClick={() => {
-                toast({
-                  title: "Md3 creado con éxito",
-                  description:
-                    "Uno de los administradores aprobara tu MD3, ¡gracias!",
-                  variant: "success",
-                });
-              }}
-            >
-              toas
-            </button>
             <DialogDescription className="py-2 text-left my-4">
               Porfavor selecciona el rival y el resultado de los partidos.
             </DialogDescription>
