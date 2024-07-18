@@ -20,7 +20,7 @@ export const getPersonInfo = async (email: string) => {
                     image {
                         url
                     }
-                    md3S {
+                    md3S(first: 3) {
                         matches {
                             homeScore
                             homeTeam {

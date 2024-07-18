@@ -98,7 +98,6 @@ const CreateMd3 = ({ user, teams }: { user: User; teams: Team[] }) => {
   const [open, setOpen] = useState(false);
   const [uploadedFileId, setUploadedFileId] = useState([]);
   const { toast } = useToast();
-  const [disableScores, setDisableScores] = useState(false);
 
   const penalsRequired = useCallback(() => {
     if (showPenals) {
@@ -118,23 +117,6 @@ const CreateMd3 = ({ user, teams }: { user: User; teams: Team[] }) => {
   useEffect(() => {
     penalsRequired();
   }, [penalsRequired]);
-
-  const resetForm = (data?: any) => {
-    if (data) {
-      form.reset({
-        ...data,
-        away_score: "",
-        home_score: "",
-        penals: undefined,
-      });
-    } else {
-      form.reset();
-      setMatches([]);
-    }
-
-    setAwayScore(undefined);
-    setHomeScore(undefined);
-  };
 
   function onSubmit(data: any, event: any) {
     setMatches([...matches, data]);
@@ -298,7 +280,13 @@ const CreateMd3 = ({ user, teams }: { user: User; teams: Team[] }) => {
               id: "",
               name: "",
             });
-            form.reset();
+            form.reset({
+              home_score: "",
+              away_score: "",
+              penals: undefined,
+              evidence: undefined,
+              awayTeam: undefined,
+            });
             setAwayScore(undefined);
             setHomeScore(undefined);
             toast({
@@ -332,7 +320,26 @@ const CreateMd3 = ({ user, teams }: { user: User; teams: Team[] }) => {
   return (
     <React.Fragment>
       <Toaster />
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog
+        open={open}
+        onOpenChange={(value) => {
+          setOpen(value);
+
+          setMd3Done(false);
+          setMatches([]);
+          setShowMatchForm(false);
+          setAwayTeam({
+            id: "",
+            name: "",
+          });
+
+          form.reset({
+            awayTeam: undefined,
+          });
+          setAwayScore(undefined);
+          setHomeScore(undefined);
+        }}
+      >
         <DialogTrigger asChild>
           <Button>Registrar MD3</Button>
         </DialogTrigger>
