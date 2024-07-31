@@ -58,7 +58,7 @@ export const getPersonInfo = async (email: string) => {
 export const getTeams = async () => {
   const teamsQuery = gql`
     query TeamsUnlessUser {
-      teams {
+      teams(first: 100) {
         id
         name
         image {
@@ -69,7 +69,7 @@ export const getTeams = async () => {
   `;
 
   try {
-    const data: { teams: Team[] } = await request(endpoint, teamsQuery);
+    const data: { teams: Team[] } = await graphcms.request(teamsQuery);
 
     return data.teams;
   } catch (error) {
