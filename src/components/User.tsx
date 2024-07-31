@@ -15,8 +15,8 @@ export const User = ({ user }: { user: any }) => {
           <Image
             width={64}
             height={64}
-            src={user.team.image.url}
-            alt={user.team.name}
+            src={user.team?.image?.url}
+            alt={user.team?.name}
           />
         </div>
       )}
