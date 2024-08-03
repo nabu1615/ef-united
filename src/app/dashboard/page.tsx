@@ -20,7 +20,7 @@ const Dashboard = async () => {
         <div className="flex w-full justify-between items-center mb-10">
           <h2 className="my-4">🎮️ Ultimos MD3 Jugados</h2>
 
-          <CreateMd3 user={user} teams={teams} />
+          {user && teams && <CreateMd3 user={user} teams={teams} />}
         </div>
 
         {md3s &&

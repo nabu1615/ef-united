@@ -82,7 +82,7 @@ const CreateMd3 = ({ user, teams }: { user: User; teams: Team[] }) => {
     resolver: resolver,
   });
 
-  const team = user.team;
+  const team = user?.team;
   const filteredTeams: Team[] = teams.filter((t) => t.id !== team?.id);
   const [awayTeam, setAwayTeam] = useState({
     name: "",
@@ -207,7 +207,7 @@ const CreateMd3 = ({ user, teams }: { user: User; teams: Team[] }) => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            homeTeamId: user.team.id,
+            homeTeamId: user?.team?.id,
             awayTeamId: match.away_team,
             homeScore: Number(match.home_score),
             awayScore: Number(match.away_score),
@@ -252,7 +252,7 @@ const CreateMd3 = ({ user, teams }: { user: User; teams: Team[] }) => {
 
             const teamsIds = [
               {
-                id: user.team.id,
+                id: user?.team?.id,
               },
               {
                 id: awayTeam.id,

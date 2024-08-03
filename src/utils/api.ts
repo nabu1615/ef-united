@@ -80,7 +80,7 @@ export const getTeams = async () => {
 export const getPeople = async () => {
   const peopleQuery = gql`
     query People {
-      people {
+      people(first: 100) {
         name
         team {
           id
