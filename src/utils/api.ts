@@ -127,3 +127,32 @@ export const createAsset = async () => {
 
   return result;
 };
+
+export const getPublishedMd3s = async (email: string) => {
+  const md3sQuery = gql`
+    query md3Points {
+      person(where: {email: "${email}"}) {
+        team {
+          md3S(
+            where: { documentInStages_some: { stage: PUBLISHED } }
+            first: 100
+          ) {
+            matches {
+              homeScore
+              awayScore
+              penals
+            }
+          }
+        }
+      }
+    }
+  `;
+
+  try {
+    const data: { person: User } = await request(endpoint, md3sQuery);
+
+    return data.person.team;
+  } catch (error) {
+    console.error(error);
+  }
+};

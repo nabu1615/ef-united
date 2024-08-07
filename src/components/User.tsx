@@ -21,7 +21,7 @@ export const User = ({ user }: { user: any }) => {
         </div>
       )}
       <p className={`ef-title text-slate-700 ml-4 ${zenDots.className}`}>
-        EF United
+        {user?.team?.name} - EF United
       </p>
     </div>
   );
