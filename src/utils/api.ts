@@ -20,7 +20,9 @@ export const getPersonInfo = async (email: string) => {
                     image {
                         url
                     }
-                    md3S(first: 3) {
+                    md3S(
+                      where: { documentInStages_some: { stage: PUBLISHED } }
+                      first: 100) {
                         matches {
                             homeScore
                             homeTeam {
