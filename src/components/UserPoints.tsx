@@ -15,8 +15,7 @@ import { currentUser } from "@clerk/nextjs/server";
 export async function UserPoints() {
   const userInfo = await currentUser();
   const email = userInfo?.emailAddresses[0]?.emailAddress.toLocaleLowerCase();
-  const { md3S }: any =
-    (await getPublishedMd3s("fabian.guitar1985@gmail.com")) ?? [];
+  const { md3S }: any = (await getPublishedMd3s(email!)) ?? [];
 
   const money = md3S.map((md3: any) => {
     let total = 0;
