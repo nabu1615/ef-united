@@ -141,6 +141,12 @@ export const getPublishedMd3s = async (email: string) => {
           ) {
             matches {
               homeScore
+              homeTeam {
+                id
+              }
+              awayTeam {
+                id
+              }
               awayScore
               penals
             }

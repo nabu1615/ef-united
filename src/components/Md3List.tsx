@@ -36,10 +36,13 @@ const Md3List = async ({ md3s: { matches } }: { md3s: Md3 }) => {
         );
       }
       if (match.awayTeam.id === userTeamId) {
-        return (
+        // User lost the md3
+        if (
           match.awayScore > match.homeScore ||
           (match.awayScore === match.homeScore && match.penals === "away")
-        );
+        ) {
+          return false;
+        }
       }
 
       return false;
@@ -93,7 +96,7 @@ const Md3List = async ({ md3s: { matches } }: { md3s: Md3 }) => {
                     className="ml-2"
                   />
                 </p>
-                <p className=" text-xs font-light slate-400">
+                <p className="text-xs font-light slate-400">
                   {homeTeamUser && homeTeamUser.name}
                 </p>
               </div>
@@ -115,7 +118,7 @@ const Md3List = async ({ md3s: { matches } }: { md3s: Md3 }) => {
 
               {match.penals && (
                 <Badge variant={wonInPenals ? "success" : "destructive"}>
-                  {wonInPenals ? "Ganado" : "Perdido"}
+                  {wonInPenals ? "Ganado" : "Perdido" + " en penales"}
                 </Badge>
               )}
             </div>

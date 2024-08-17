@@ -11,22 +11,52 @@ import {
 } from "@/components/ui/card";
 import { getPublishedMd3s } from "@/utils/api";
 import { currentUser } from "@clerk/nextjs/server";
+import { getUser } from "@/server/get-user";
 
 export async function UserPoints() {
   const userInfo = await currentUser();
   const email = userInfo?.emailAddresses[0]?.emailAddress.toLocaleLowerCase();
   const { md3S }: any = (await getPublishedMd3s(email!)) ?? [];
+  const user = await getUser();
 
   const money = md3S.map((md3: any) => {
     let total = 0;
+    const userTeamId = user?.team.id;
+
     md3.matches.forEach((match: any) => {
-      if (match.homeScore > match.awayScore) {
-        total += 600;
-      } else if (match.homeScore === match.awayScore) {
-        if (match.penals === "home") {
+      if (match.homeTeam.id === userTeamId) {
+        if (match.homeScore > match.awayScore) {
           total += 600;
-        } else if (match.penals === "away") {
-          total += 300;
+        }
+
+        if (match.homeScore === match.awayScore) {
+          if (match.penals === "home") {
+            total += 600;
+          } else if (match.penals === "away") {
+            total += 300;
+          }
+        }
+
+        if (match.awayScore > match.homeScore) {
+          total += 100;
+        }
+      }
+
+      if (match.awayTeam.id === userTeamId) {
+        if (match.homeScore > match.awayScore) {
+          total += 100;
+        }
+
+        if (match.awayScore > match.homeScore) {
+          total += 600;
+        }
+
+        if (match.awayScore === match.homeScore) {
+          if (match.penals === "away") {
+            total += 600;
+          } else if (match.penals === "home") {
+            total += 300;
+          }
         }
       }
     });
