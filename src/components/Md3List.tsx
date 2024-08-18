@@ -85,7 +85,7 @@ const Md3List = async ({ md3s: { matches } }: { md3s: Md3 }) => {
             key={index}
           >
             <div className="flex items-center justify-end">
-              <div className="text-right">
+              <div className="text-right mb-2">
                 <p className="flex font-bold text-sm slate-800 justify-end">
                   {match.homeTeam.name}
                   <Image
@@ -101,7 +101,7 @@ const Md3List = async ({ md3s: { matches } }: { md3s: Md3 }) => {
                 </p>
               </div>
             </div>
-            <div className="flex justify-center items-center text-4xl relative flex-col">
+            <div className="flex justify-center items-center text-4xl flex-col">
               <div className="flex items-center">
                 <p
                   className={`text-slate-800 text-lg md:text-2xl ${zenDots.className}`}
@@ -117,13 +117,20 @@ const Md3List = async ({ md3s: { matches } }: { md3s: Md3 }) => {
               </div>
 
               {match.penals && (
-                <Badge variant={wonInPenals ? "success" : "destructive"}>
+                <div
+                  className={
+                    wonInPenals
+                      ? "bg-green-500"
+                      : "bg-red-500" +
+                        " text-center text-xs absolute bottom-0 text-white px-2 rounded"
+                  }
+                >
                   {wonInPenals ? "Ganado" : "Perdido" + " en penales"}
-                </Badge>
+                </div>
               )}
             </div>
             <div className="flex items-center">
-              <div className="text-left">
+              <div className="text-left mb-2">
                 <p className="flex font-bold text-sm slate-800">
                   <Image
                     src={match.awayTeam.image.url}
