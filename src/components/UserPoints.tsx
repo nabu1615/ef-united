@@ -12,68 +12,25 @@ import {
 import { getPublishedMd3s } from "@/utils/api";
 import { currentUser } from "@clerk/nextjs/server";
 import { getUser } from "@/server/get-user";
+import { getUserMoney } from "@/utils/utils";
 
 export async function UserPoints() {
   const userInfo = await currentUser();
   const email = userInfo?.emailAddresses[0]?.emailAddress.toLocaleLowerCase();
   const { md3S }: any = (await getPublishedMd3s(email!)) ?? [];
   const user = await getUser();
+  const teamId = user?.team.id;
 
-  const money = md3S.map((md3: any) => {
-    let total = 0;
-    const userTeamId = user?.team.id;
-
-    md3.matches.forEach((match: any) => {
-      if (match.homeTeam.id === userTeamId) {
-        if (match.homeScore > match.awayScore) {
-          total += 600;
-        }
-
-        if (match.homeScore === match.awayScore) {
-          if (match.penals === "home") {
-            total += 600;
-          } else if (match.penals === "away") {
-            total += 300;
-          }
-        }
-
-        if (match.awayScore > match.homeScore) {
-          total += 100;
-        }
-      }
-
-      if (match.awayTeam.id === userTeamId) {
-        if (match.homeScore > match.awayScore) {
-          total += 100;
-        }
-
-        if (match.awayScore > match.homeScore) {
-          total += 600;
-        }
-
-        if (match.awayScore === match.homeScore) {
-          if (match.penals === "away") {
-            total += 600;
-          } else if (match.penals === "home") {
-            total += 300;
-          }
-        }
-      }
-    });
-
-    return total;
-  });
-
-  const sum = money.reduce((a: number, b: number) => a + b, 0);
+  const money = getUserMoney(md3S, teamId);
 
   const formatter = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
   });
 
-  const formattedNumber = formatter.format(sum);
+  const formattedNumber = formatter.format(money);
 
-  const possibleToEarn = 40000 - sum;
+  const possibleToEarn = 40000 - money;
   const userCanEarn = possibleToEarn > 0;
 
   return (
@@ -93,9 +50,9 @@ export async function UserPoints() {
           <div className="flex-1">
             <p className="text-sm font-medium leading-none">
               Aun puedes sumar
-              <div className="text-lg font-bold">
+              <span className="text-lg font-bold">
                 {userCanEarn ? formatter.format(possibleToEarn) : "$" + 0}
-              </div>
+              </span>
             </p>
             {userCanEarn ? (
               <p className="text-xs text-muted-foreground m-0">

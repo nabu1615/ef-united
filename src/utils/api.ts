@@ -164,3 +164,38 @@ export const getPublishedMd3s = async (email: string) => {
     console.error(error);
   }
 };
+
+export const getTeamsMD3s = async () => {
+  const md3sQuery = gql`
+    query md3Points {
+      teams(first: 100) {
+        id
+        name
+        md3S(
+          where: { documentInStages_some: { stage: PUBLISHED } }
+          first: 1000
+        ) {
+          matches {
+            homeScore
+            homeTeam {
+              id
+            }
+            penals
+            awayTeam {
+              id
+            }
+            awayScore
+          }
+        }
+      }
+    }
+  `;
+
+  try {
+    const data: { teams: Team[] } = await request(endpoint, md3sQuery);
+
+    return data;
+  } catch (error) {
+    console.error(error);
+  }
+};
