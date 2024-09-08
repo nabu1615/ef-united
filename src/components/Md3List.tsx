@@ -119,13 +119,11 @@ const Md3List = async ({ md3s: { matches } }: { md3s: Md3 }) => {
               {match.penals && (
                 <div
                   className={
-                    wonInPenals
-                      ? "bg-green-500"
-                      : "bg-red-500" +
-                        " text-center text-xs absolute bottom-0 text-white px-2 rounded"
+                    (wonInPenals ? "bg-green-500" : "bg-red-500") +
+                    " text-white px-2 py-1 rounded-full text-xs"
                   }
                 >
-                  {wonInPenals ? "Ganado" : "Perdido" + " en penales"}
+                  {wonInPenals ? "Ganado" : "Perdido"} en penales
                 </div>
               )}
             </div>

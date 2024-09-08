@@ -49,7 +49,7 @@ export async function UserPoints() {
           <BellRing />
           <div className="flex-1">
             <p className="text-sm font-medium leading-none">
-              Aun puedes sumar
+              Aun puedes sumar{" "}
               <span className="text-lg font-bold">
                 {userCanEarn ? formatter.format(possibleToEarn) : "$" + 0}
               </span>
