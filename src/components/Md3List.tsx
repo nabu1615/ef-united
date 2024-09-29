@@ -120,7 +120,7 @@ const Md3List = async ({ md3s: { matches } }: { md3s: Md3 }) => {
                 <div
                   className={
                     (wonInPenals ? "bg-green-500" : "bg-red-500") +
-                    " text-white px-2 py-1 rounded-full text-xs"
+                    " text-white px-2 py-1 rounded-full text-xs text-center"
                   }
                 >
                   {wonInPenals ? "Ganado" : "Perdido"} en penales
