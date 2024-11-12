@@ -8,6 +8,11 @@
     "start": "next start",
     "lint": "next lint"
   },
+  "browser": {
+    "fs": false,
+    "path": false,
+    "os": false
+  },
   "dependencies": {
     "@clerk/localizations": "^1.26.8",
     "@clerk/nextjs": "^5.2.0",
@@ -35,6 +40,7 @@
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.51.5",
     "sanity": "^3.63.0",
+    "sanity-plugin-media": "^2.3.2",
     "styled-components": "^6.1.13",
     "tailwind-merge": "^2.3.0",
     "tailwindcss-animate": "^1.0.7",

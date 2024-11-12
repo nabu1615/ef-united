@@ -9,19 +9,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { getPublishedMd3s } from "@/utils/api";
-import { currentUser } from "@clerk/nextjs/server";
+
 import { getUser } from "@/server/get-user";
 import { getUserMoney } from "@/utils/utils";
 
-export async function UserPoints() {
-  const userInfo = await currentUser();
-  const email = userInfo?.emailAddresses[0]?.emailAddress.toLocaleLowerCase();
-  const { md3S }: any = (await getPublishedMd3s(email!)) ?? [];
+export async function UserPoints({ md3Approved }: any) {
   const user = await getUser();
-  const teamId = user?.team.id;
+  const userId = user?._id;
 
-  const money = getUserMoney(md3S, teamId);
+  const money = getUserMoney(md3Approved, userId);
 
   const formatter = new Intl.NumberFormat("en-US", {
     style: "currency",

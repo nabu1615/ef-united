@@ -1,201 +1,168 @@
-import { User, Team } from "@/types/api";
+import { client } from "@/sanity/lib/client";
+import { User } from "@/types/api";
 import { GraphQLClient, gql, request } from "graphql-request";
 
-const endpoint = process.env.HYGRAPH_ENDPOINT || "";
-const token = process.env.HYGRAPH_TOKEN || "";
+interface CreateMatchParams {
+  homeUserId: string;
+  homeScore: number;
+  awayUserId: string;
+  awayScore: number;
+  penals: string;
+}
 
-const graphcms = new GraphQLClient(endpoint, {
-  headers: { Authorization: `Bearer ${token}` },
-});
-
-export const getPersonInfo = async (email: string) => {
-  const personQuery = gql`
-        query PersonQuery {
-            person(where: {email: "${email}"}) {
-                id
-                name
-                team {
-                    id
-                    name
-                    image {
-                        url
-                    }
-                    md3S(
-                      where: { documentInStages_some: { stage: PUBLISHED } }
-                      first: 100) {
-                        matches {
-                            homeScore
-                            homeTeam {
-                                id
-                                name
-                                image {
-                                    url
-                                }
-                            }
-                            awayScore
-                            awayTeam {
-                                id
-                                name
-                                image {
-                                    url
-                                }
-                            }
-                            penals
-                        }
-                    }
-                }
-            }
-        }
-    `;
-
+export async function fetchPeople() {
   try {
-    const data: { person: User } = await request(endpoint, personQuery);
-
-    return data.person;
-  } catch (error) {
-    console.error(error);
-  }
-};
-
-export const getTeams = async () => {
-  const teamsQuery = gql`
-    query TeamsUnlessUser {
-      teams(first: 100) {
-        id
-        name
-        image {
-          url
-        }
-      }
+    const people = await client.fetch(`
+    *[_type == "person"] | order(name asc) {
+      _id,
+      name,
+      email, 
+      userName
     }
-  `;
+      `);
+    return people;
+  } catch (error) {
+    console.error("Error fetching people:", error);
+    return null;
+  }
+}
 
+export async function fetchPersonByEmail(email: string) {
   try {
-    const data: { teams: Team[] } = await graphcms.request(teamsQuery);
-
-    return data.teams;
+    const person = await client.fetch(
+      `*[_type == "person" && email == $email][0]`,
+      { email }
+    );
+    return person;
   } catch (error) {
-    console.error(error);
+    console.error("Error fetching person by email:", error);
+    return null;
   }
-};
+}
 
-export const getPeople = async () => {
-  const peopleQuery = gql`
-    query People {
-      people(first: 100) {
-        name
-        team {
-          id
-          name
-        }
-      }
-    }
-  `;
+function generateRandomKey() {
+  return Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
+}
 
+export async function fetchUserMd3s(email: string) {
   try {
-    const data: { people: User[] } = await request(endpoint, peopleQuery);
-
-    return data.people;
-  } catch (error) {
-    console.error(error);
-  }
-};
-
-export const publishAsset = async (id: string) => {
-  const mutation = gql`
-  mutation {
-    publishAsset(where: {id: "${id}"}, to: PUBLISHED) {
-      id
-    }
-  }
-  `;
-  const result = await graphcms.request(mutation, {
-    id,
-  });
-
-  return result;
-};
-
-export const createAsset = async () => {
-  const mutation = gql`
-    mutation createAsset {
-      createAsset(data: {}) {
-        id
-        url
-      }
-    }
-  `;
-  const result = await graphcms.request(mutation);
-
-  return result;
-};
-
-export const getPublishedMd3s = async (email: string) => {
-  const md3sQuery = gql`
-    query md3Points {
-      person(where: {email: "${email}"}) {
-        team {
-          md3S(
-            where: { documentInStages_some: { stage: PUBLISHED } }
-            first: 100
-          ) {
-            matches {
-              homeScore
-              homeTeam {
-                id
-              }
-              awayTeam {
-                id
-              }
-              awayScore
-              penals
-            }
-          }
-        }
-      }
-    }
-  `;
-
-  try {
-    const data: { person: User } = await request(endpoint, md3sQuery);
-
-    return data.person.team;
-  } catch (error) {
-    console.error(error);
-  }
-};
-
-export const getTeamsMD3s = async () => {
-  const md3sQuery = gql`
-    query md3Points {
-      teams(first: 100) {
-        id
-        name
-        md3S(
-          where: { documentInStages_some: { stage: PUBLISHED } }
-          first: 1000
-        ) {
-          matches {
-            homeScore
-            homeTeam {
-              id
-            }
+    const md3s = await client.fetch(
+      `
+      *[_type == "person" && email == $email][0] {
+        "md3s": md3s[]->{
+          _id,
+          state,
+          matches[]-> {
+            _id,
+            homeUser-> {
+              _id,
+              name,
+              userName
+            },
+            awayUser-> {
+              _id,
+              name,
+              userName
+            },
+            awayScore,
+            homeScore,
             penals
-            awayTeam {
-              id
-            }
-            awayScore
           }
         }
       }
-    }
-  `;
-
-  try {
-    const data: { teams: Team[] } = await request(endpoint, md3sQuery);
-
-    return data;
+      `,
+      { email }
+    );
+    return md3s;
   } catch (error) {
-    console.error(error);
+    console.error("Error fetching MD3s:", error);
+    return null;
   }
-};
+}
+
+export async function createMatch({
+  homeUserId,
+  homeScore,
+  awayUserId,
+  awayScore,
+  penals,
+}: CreateMatchParams) {
+  {
+    try {
+      const newMatch = await client.create({
+        _type: "match",
+        homeUser: { _type: "reference", _ref: homeUserId },
+        homeScore: homeScore,
+        awayUser: { _type: "reference", _ref: awayUserId },
+        awayScore: awayScore,
+        penals: penals,
+      });
+
+      console.log("Partido creado exitosamente:", newMatch);
+      return newMatch._id;
+    } catch (error) {
+      console.error("Error al crear el partido:", error);
+    }
+  }
+}
+
+export async function createMd3(
+  imageId: any,
+  matchIds: string[],
+  users: string[]
+) {
+  try {
+    const newMd3 = await client.create({
+      _type: "md3",
+      evidence: imageId
+        ? { _type: "image", asset: { _type: "reference", _ref: imageId } }
+        : undefined,
+      state: "pending",
+    });
+
+    const homeUserId = users[0];
+    const awayUserId = users[1];
+
+    await Promise.all([
+      client
+        .patch(homeUserId)
+        .setIfMissing({ md3s: [] })
+        .append("md3s", [{ _type: "reference", _ref: newMd3._id }])
+        .commit({
+          autoGenerateArrayKeys: true,
+        }),
+
+      client
+        .patch(awayUserId)
+        .setIfMissing({ md3s: [] })
+        .append("md3s", [{ _type: "reference", _ref: newMd3._id }])
+        .commit({
+          autoGenerateArrayKeys: true,
+        }),
+
+      client
+        .patch(newMd3._id)
+        .set({
+          matches: matchIds.map((id) => ({ _type: "reference", _ref: id })),
+        })
+        .commit({
+          autoGenerateArrayKeys: true,
+        }),
+    ]);
+
+    console.log("MD3 creado exitosamente:", newMd3);
+    return newMd3;
+  } catch (error) {
+    console.error("Error al crear el MD3:", error);
+  }
+}
+
+export async function uploadFileHandler(file: any) {
+  try {
+    client.assets.upload("image", file).then((res) => {
+      return res.assetId;
+    });
+  } catch (error) {
+    console.error("Error uploading file:", error);
+  }
+}

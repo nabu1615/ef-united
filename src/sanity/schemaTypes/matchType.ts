@@ -7,10 +7,22 @@ export const matchType = defineType({
   description: "A match",
   fields: [
     defineField({
+      name: "homeUser",
+      title: "Home User",
+      type: "reference",
+      to: [{ type: "person" }],
+    }),
+    defineField({
       name: "homeScore",
       title: "Home Score",
       type: "number",
       validation: (rule) => rule.required().min(0).max(99),
+    }),
+    defineField({
+      name: "awayUser",
+      title: "Away User",
+      type: "reference",
+      to: [{ type: "person" }],
     }),
     defineField({
       name: "awayScore",
@@ -27,14 +39,13 @@ export const matchType = defineType({
       },
     }),
   ],
-
   preview: {
     select: {
       id: "_id",
     },
     prepare({ id }) {
       return {
-        title: `ID: ${id}`,
+        title: id,
       };
     },
   },

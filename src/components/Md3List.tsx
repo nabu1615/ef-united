@@ -2,8 +2,7 @@ import { getUser } from "@/server/get-user";
 import { Match, Md3, User } from "@/types/api";
 import { Zen_Dots } from "next/font/google";
 import { Badge } from "@/components/ui/badge";
-import Image from "next/image";
-import { getPeople } from "@/utils/api";
+import { fetchPeople } from "@/utils/api";
 
 const zenDots = Zen_Dots({
   subsets: ["latin"],
@@ -12,7 +11,7 @@ const zenDots = Zen_Dots({
 
 function getTeamUser(people: User[], teamId: string, defaultName: string) {
   return (
-    (people && people.find((person: any) => person.team.id === teamId)) || {
+    (people && people.find((person: any) => person._id === teamId)) || {
       name: defaultName,
     }
   );
@@ -20,8 +19,8 @@ function getTeamUser(people: User[], teamId: string, defaultName: string) {
 
 const Md3List = async ({ md3s: { matches } }: { md3s: Md3 }) => {
   const user = await getUser();
-  const people = await getPeople();
-  const userTeamId = user?.team.id;
+  const people = await fetchPeople();
+  const userTeamId = user?._id;
 
   if (!matches) {
     return <div>Md3 not found</div>;
@@ -29,17 +28,17 @@ const Md3List = async ({ md3s: { matches } }: { md3s: Md3 }) => {
 
   const whoWon = () => {
     const didUserWinMatch = (match: Match): boolean => {
-      if (match.homeTeam.id === userTeamId) {
+      if (match?.homeUser?._id === userTeamId) {
         return (
-          match.homeScore > match.awayScore ||
-          (match.homeScore === match.awayScore && match.penals === "home")
+          match?.homeScore > match?.awayScore ||
+          (match?.homeScore === match?.awayScore && match?.penals === "home")
         );
       }
-      if (match.awayTeam.id === userTeamId) {
+      if (match?.awayUser?._id === userTeamId) {
         // User lost the md3
         if (
-          match.awayScore > match.homeScore ||
-          (match.awayScore === match.homeScore && match.penals === "away")
+          match?.awayScore > match?.homeScore ||
+          (match?.awayScore === match?.homeScore && match?.penals === "away")
         ) {
           return false;
         }
@@ -69,15 +68,15 @@ const Md3List = async ({ md3s: { matches } }: { md3s: Md3 }) => {
       }
       {matches.map((match: Match, index: number) => {
         const userHomeOrAway =
-          match.homeTeam.id === userTeamId ? "home" : "away";
-        const wonInPenals = match.penals && match.penals === userHomeOrAway;
-        const homeTeamUser =
+          match?.homeUser?._id === userTeamId ? "home" : "away";
+        const wonInPenals = match?.penals && match?.penals === userHomeOrAway;
+        const homeUser =
           people &&
-          getTeamUser(people, match.homeTeam.id, "Nombre Usuario Local");
+          getTeamUser(people, match?.homeUser?._id, "Nombre Usuario Local");
 
-        const awayTeamUser =
+        const awayUser =
           people &&
-          getTeamUser(people, match.awayTeam.id, "Nombre Usuario Visitante");
+          getTeamUser(people, match?.awayUser?._id, "Nombre Usuario Visitante");
 
         return (
           <div
@@ -87,17 +86,10 @@ const Md3List = async ({ md3s: { matches } }: { md3s: Md3 }) => {
             <div className="flex items-center justify-end">
               <div className="text-right mb-2">
                 <p className="flex font-bold text-sm slate-800 justify-end">
-                  {match.homeTeam.name}
-                  <Image
-                    src={match.homeTeam.image.url}
-                    width={20}
-                    height={20}
-                    alt={match.homeTeam.name}
-                    className="ml-2"
-                  />
+                  {match?.homeUser?.name}
                 </p>
                 <p className="text-xs font-light slate-400">
-                  {homeTeamUser && homeTeamUser.name}
+                  {homeUser?.userName}
                 </p>
               </div>
             </div>
@@ -106,17 +98,17 @@ const Md3List = async ({ md3s: { matches } }: { md3s: Md3 }) => {
                 <p
                   className={`text-slate-800 text-lg md:text-2xl ${zenDots.className}`}
                 >
-                  {match.homeScore}
+                  {match?.homeScore}
                 </p>
                 <span className="mx-2">-</span>
                 <p
                   className={`text-slate-800 text-lg md:text-2xl ${zenDots.className}`}
                 >
-                  {match.awayScore}
+                  {match?.awayScore}
                 </p>
               </div>
 
-              {match.penals && (
+              {match?.penals && (
                 <div
                   className={
                     (wonInPenals ? "bg-green-500" : "bg-red-500") +
@@ -130,17 +122,10 @@ const Md3List = async ({ md3s: { matches } }: { md3s: Md3 }) => {
             <div className="flex items-center">
               <div className="text-left mb-2">
                 <p className="flex font-bold text-sm slate-800">
-                  <Image
-                    src={match.awayTeam.image.url}
-                    width={20}
-                    height={20}
-                    alt={match.awayTeam.name}
-                    className="mr-2"
-                  />
-                  {match.awayTeam.name}
+                  {match?.awayUser.name}
                 </p>
                 <p className="text-xs font-light slate-400">
-                  {awayTeamUser && awayTeamUser.name}
+                  {awayUser?.userName}
                 </p>
               </div>
             </div>

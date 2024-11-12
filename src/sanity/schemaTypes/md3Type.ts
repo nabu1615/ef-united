@@ -6,6 +6,19 @@ export const md3Type = defineType({
   type: "document",
   fields: [
     defineField({
+      name: "state",
+      title: "Estado",
+      type: "string",
+      options: {
+        list: [
+          { title: "Pendiente", value: "pending" },
+          { title: "Aprobado", value: "approved" },
+        ], // Lista de opciones
+        layout: "radio", // Opcional: Esto cambia el tipo de selección a botones de radio
+      },
+      initialValue: "pending",
+    }),
+    defineField({
       name: "evidence",
       title: "Evidencia",
       type: "image",
@@ -17,14 +30,15 @@ export const md3Type = defineType({
       of: [{ type: "reference", to: [{ type: "match" }] }],
     }),
   ],
-
   preview: {
     select: {
       id: "_id",
+      state: "state",
     },
-    prepare({ id }) {
+    prepare({ id, state }) {
+      const stateTitle = state + " - " + id;
       return {
-        title: `ID: ${id}`,
+        title: stateTitle,
       };
     },
   },

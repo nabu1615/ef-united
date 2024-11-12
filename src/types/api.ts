@@ -1,26 +1,19 @@
 export interface User {
-  id: string;
+  _id: string;
   name: string;
-  team: Team;
+  userName: string;
+  md3s: Md3[];
 }
 
 export interface Md3 {
   matches: Match[];
+  state: string;
 }
 
 export interface Match {
   homeScore: number;
-  homeTeam: Team;
+  homeUser: User;
   awayScore: number;
-  awayTeam: Team;
+  awayUser: User;
   penals?: string;
-}
-
-export interface Team {
-  id: string;
-  name: string;
-  image: {
-    url: string;
-  };
-  md3S: Md3[];
 }

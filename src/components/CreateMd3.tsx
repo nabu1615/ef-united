@@ -30,7 +30,7 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { User, Team } from "@/types/api";
+import { User } from "@/types/api";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -39,15 +39,16 @@ import Loader from "./Loader";
 import { UploadFile } from "./UploadFile";
 import { useToast } from "./ui/use-toast";
 import { Toaster } from "./ui/toaster";
+import { createMatch, createMd3 } from "@/utils/api";
 
 const formErrors = {
-  away_team: "Selecciona un equipo",
+  away_user: "Selecciona un equipo",
   home_score: "Introduce el marcador de tu equipo",
   away_score: "Introduce el marcador del rival",
 };
 
 const FormSchemaBase = z.object({
-  away_team: z.string({
+  away_user: z.string({
     required_error: "Porfavor secciona un equipo",
   }),
   home_score: z
@@ -73,7 +74,7 @@ const FormSchemaBase = z.object({
   penals: z.enum(["home", "away"]).optional(),
 });
 
-const CreateMd3 = ({ user, teams }: { user: User; teams: Team[] }) => {
+const CreateMd3 = ({ user, users }: { user: User; users: User[] }) => {
   const [formSchema, setFormSchema] = useState(FormSchemaBase);
   // @ts-ignore
   const resolver = new zodResolver(formSchema);
@@ -82,11 +83,11 @@ const CreateMd3 = ({ user, teams }: { user: User; teams: Team[] }) => {
     resolver: resolver,
   });
 
-  const team = user?.team;
-  const filteredTeams: Team[] = teams.filter((t) => t.id !== team?.id);
-  const [awayTeam, setAwayTeam] = useState({
+  const filteredTeams: User[] = users.filter((t) => t._id !== user?._id);
+  const [awayUser, setAwayUser] = useState({
     name: "",
-    id: "",
+    _id: "",
+    userName: "",
   });
   const [matches, setMatches]: any = useState([]);
   const [homeScore, setHomeScore] = useState();
@@ -132,10 +133,6 @@ const CreateMd3 = ({ user, teams }: { user: User; teams: Team[] }) => {
     setHomeScore(undefined);
   }
 
-  const getTeamName = (id: string) => {
-    return teams.find((team) => team.id === id)?.name as string;
-  };
-
   useEffect(() => {
     penalsRequired();
   }, [showPenals, penalsRequired]);
@@ -168,72 +165,31 @@ const CreateMd3 = ({ user, teams }: { user: User; teams: Team[] }) => {
     }
   }, [awayScore, homeScore]);
 
-  const createMd3 = async (matches: any, teams: any, evidence: any) => {
-    const response = await fetch("/api/createMd3", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        matches,
-        teams,
-        evidence,
-      }),
-    });
-
-    if (!response.ok) {
-      const errorResponse = await response.json();
-      throw new Error(errorResponse.error || "Error creating md3");
-    }
-
-    const responseData = await response.json();
-
-    return responseData;
-  };
-
-  const createMatch = async (data: any[], user: { team: { id: string } }) => {
+  const createMatchHandler = async (data: any[], user: User) => {
     setCreateMd3Loader(true);
-    const delay = (ms: number) =>
-      new Promise((resolve) => setTimeout(resolve, ms));
 
-    const responses = [];
+    const ids = [];
 
     // Manejo de promesas para cada partido
     for (const match of data) {
+      const newMatchObj = {
+        homeUserId: user?._id,
+        awayUserId: awayUser._id,
+        homeScore: Number(match.home_score),
+        awayScore: Number(match.away_score),
+        penals: match.penals,
+      };
+
       try {
-        const response = await fetch("/api/createMatch", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            homeTeamId: user?.team?.id,
-            awayTeamId: match.away_team,
-            homeScore: Number(match.home_score),
-            awayScore: Number(match.away_score),
-            penals: match.penals,
-          }),
-        });
-
-        // Manejo de la respuesta de la solicitud
-        if (!response.ok) {
-          const errorResponse = await response.json();
-          throw new Error(errorResponse.error || "Error creating match");
-        }
-
-        const responseData = await response.json();
-
-        responses.push(responseData);
-
-        // Esperar un segundo antes de la siguiente solicitud
-        await delay(100);
+        const response = (await createMatch(newMatchObj)) as string;
+        ids.push(response);
       } catch (error) {
         console.error("Error creating match:", error);
         throw error; // Re-lanzar el error para manejarlo fuera de esta función
       }
     }
 
-    return responses;
+    return ids;
   };
 
   useEffect(() => {
@@ -241,32 +197,27 @@ const CreateMd3 = ({ user, teams }: { user: User; teams: Team[] }) => {
       setShowMatchForm(false);
 
       if (uploadedFileId.length > 0) {
-        createMatch(matches, user)
-          .then(async (responses) => {
+        createMatchHandler(matches, user)
+          .then(async (matchesIds) => {
             // Crear el MD3
-            const matchesIds = responses.map((response) => {
-              return {
-                id: response.matchId,
-              };
-            });
 
             const teamsIds = [
               {
-                id: user?.team?.id,
+                id: user?._id,
               },
               {
-                id: awayTeam.id,
+                id: awayUser._id,
               },
             ];
 
             try {
+              const users = [user?._id, awayUser?._id];
               const md3Response = await createMd3(
+                uploadedFileId[0].id,
                 matchesIds,
-                teamsIds,
-                uploadedFileId
+                users
               );
-              console.log("MD3 created successfully", md3Response);
-
+              console.log("MD3 creado exitosamente:", md3Response);
               setCreateMd3Loader(false);
             } catch (error) {
               console.log("Error creating MD3:", error);
@@ -276,16 +227,17 @@ const CreateMd3 = ({ user, teams }: { user: User; teams: Team[] }) => {
             setUploadedFileId([]);
             setOpen(false);
             setMatches([]);
-            setAwayTeam({
-              id: "",
+            setAwayUser({
+              _id: "",
               name: "",
+              userName: "",
             });
             form.reset({
               home_score: "",
               away_score: "",
               penals: undefined,
               evidence: undefined,
-              awayTeam: undefined,
+              awayUser: undefined,
             });
             setAwayScore(undefined);
             setHomeScore(undefined);
@@ -328,13 +280,14 @@ const CreateMd3 = ({ user, teams }: { user: User; teams: Team[] }) => {
           setMd3Done(false);
           setMatches([]);
           setShowMatchForm(false);
-          setAwayTeam({
-            id: "",
+          setAwayUser({
+            _id: "",
             name: "",
+            userName: "",
           });
 
           form.reset({
-            awayTeam: undefined,
+            awayUser: undefined,
           });
           setAwayScore(undefined);
           setHomeScore(undefined);
@@ -357,7 +310,7 @@ const CreateMd3 = ({ user, teams }: { user: User; teams: Team[] }) => {
                   <div className="grid gap-2">
                     <FormField
                       control={form.control}
-                      name="away_team"
+                      name="away_user"
                       render={({ field }) => (
                         <FormItem className="my-3">
                           <FormLabel className="py-2 text-left w-full block">
@@ -366,9 +319,14 @@ const CreateMd3 = ({ user, teams }: { user: User; teams: Team[] }) => {
                           <Select
                             onValueChange={(value) => {
                               field.onChange(value);
-                              setAwayTeam({
-                                id: value,
-                                name: getTeamName(value),
+                              const getUser = users.find(
+                                (u) => u._id === value
+                              );
+
+                              setAwayUser({
+                                _id: getUser?._id || "",
+                                name: getUser?.name || "",
+                                userName: getUser?.userName || "",
                               });
                               setShowMatchForm(true);
                             }}
@@ -378,13 +336,13 @@ const CreateMd3 = ({ user, teams }: { user: User; teams: Team[] }) => {
                           >
                             <FormControl>
                               <SelectTrigger>
-                                <SelectValue placeholder="---" />
+                                <SelectValue placeholder="Selecciona un equipo" />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
                               {filteredTeams.map((t) => (
-                                <SelectItem key={t.id} value={t.id}>
-                                  {t.name}
+                                <SelectItem key={t._id} value={t._id}>
+                                  {t.name} - {t.userName}
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -412,7 +370,10 @@ const CreateMd3 = ({ user, teams }: { user: User; teams: Team[] }) => {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel className="pt-2 text-left block mb-4">
-                              {team?.name}
+                              {user?.name}
+                              <p className="text-xs text-gray-500 my-1">
+                                {user?.userName}
+                              </p>
                             </FormLabel>
                             <Input
                               type="number"
@@ -441,8 +402,11 @@ const CreateMd3 = ({ user, teams }: { user: User; teams: Team[] }) => {
                         control={form.control}
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="pt-2 text-left block mb-4">
-                              {awayTeam.name || "Equipo Rival"}
+                            <FormLabel className="pt-2 text-left block mb-4 ">
+                              {awayUser.name || "Equipo Rival"}
+                              <p className="text-xs text-gray-500 my-1">
+                                {awayUser.userName}
+                              </p>
                             </FormLabel>
                             <Input
                               type="number"
@@ -485,7 +449,7 @@ const CreateMd3 = ({ user, teams }: { user: User; teams: Team[] }) => {
                                   <RadioGroupItem value="home" />
                                 </FormControl>
                                 <FormLabel className="font-normal">
-                                  {team?.name} Ganá por penales / Rival no pone
+                                  {user?.name} Ganá por penales / Rival no pone
                                   penales
                                 </FormLabel>
                               </FormItem>
@@ -494,7 +458,7 @@ const CreateMd3 = ({ user, teams }: { user: User; teams: Team[] }) => {
                                   <RadioGroupItem value="away" />
                                 </FormControl>
                                 <FormLabel className="font-normal">
-                                  {awayTeam.name || "Equipo Rival"} Ganá por
+                                  {awayUser.name || "Equipo Rival"} Ganá por
                                   penales / No pongo penales
                                 </FormLabel>
                               </FormItem>
