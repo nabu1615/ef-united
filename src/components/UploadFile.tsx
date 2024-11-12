@@ -44,7 +44,7 @@ export const UploadFile = ({
 
       if (file) {
         const id = await uploadFileHandler(file[0]);
-        setUploadedFileId([{ id }]);
+        setUploadedFileId(id);
         console.log("File uploaded successfully", id);
       } else {
         console.log("No file selected");

@@ -97,7 +97,7 @@ const CreateMd3 = ({ user, users }: { user: User; users: User[] }) => {
   const [showMatchForm, setShowMatchForm] = useState(false);
   const [createMd3Loader, setCreateMd3Loader] = useState(false);
   const [open, setOpen] = useState(false);
-  const [uploadedFileId, setUploadedFileId] = useState([]);
+  const [uploadedFileId, setUploadedFileId] = useState("");
   const { toast } = useToast();
 
   const penalsRequired = useCallback(() => {
@@ -213,7 +213,7 @@ const CreateMd3 = ({ user, users }: { user: User; users: User[] }) => {
             try {
               const users = [user?._id, awayUser?._id];
               const md3Response = await createMd3(
-                uploadedFileId[0].id,
+                uploadedFileId,
                 matchesIds,
                 users
               );
@@ -224,7 +224,7 @@ const CreateMd3 = ({ user, users }: { user: User; users: User[] }) => {
             }
 
             setMd3Done(false);
-            setUploadedFileId([]);
+            setUploadedFileId("");
             setOpen(false);
             setMatches([]);
             setAwayUser({

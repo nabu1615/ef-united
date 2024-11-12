@@ -1,8 +1,8 @@
-export const getUserMoney = (md3S: any, teamId: any) => {
+export const getUserMoney = (md3S: any, userId: any) => {
   let total = 0;
-  md3S.forEach((md3: any) => {
+  md3S?.forEach((md3: any) => {
     md3.matches.forEach((match: any) => {
-      if (match.homeUser._id === teamId) {
+      if (match.homeUser._id === userId) {
         if (match.homeScore > match.awayScore) {
           total += 600;
         }
@@ -20,7 +20,7 @@ export const getUserMoney = (md3S: any, teamId: any) => {
         }
       }
 
-      if (match.awayUser._id === teamId) {
+      if (match.awayUser._id === userId) {
         if (match.homeScore > match.awayScore) {
           total += 100;
         }

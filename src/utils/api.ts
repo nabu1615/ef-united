@@ -107,7 +107,7 @@ export async function createMatch({
 }
 
 export async function createMd3(
-  imageId: any,
+  imageId: string,
   matchIds: string[],
   users: string[]
 ) {

@@ -1,6 +1,6 @@
 "use server";
 
-import { fetchPersonByEmail, getPersonInfo } from "@/utils/api";
+import { fetchPersonByEmail } from "@/utils/api";
 import { currentUser } from "@clerk/nextjs/server";
 
 export async function getUser() {
