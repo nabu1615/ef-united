@@ -24,11 +24,7 @@ const formSchema = z.object({
   }),
 });
 
-export const UploadFile = ({
-  setUploadedFileId,
-}: {
-  setUploadedFileId: any;
-}) => {
+export const UploadFile = ({ setUploadedFile }: { setUploadedFile: any }) => {
   const [isLoading, setIsLoading] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -43,17 +39,11 @@ export const UploadFile = ({
       setIsLoading(true);
 
       if (file) {
-<<<<<<< Updated upstream
-        const id = await uploadFileHandler(file[0]);
-        setUploadedFileId(id);
-        console.log("File uploaded successfully", id);
-=======
         const response = await uploadFileHandler(file[0]);
         setUploadedFile({
           id: response._id,
           url: response.url,
         });
->>>>>>> Stashed changes
       } else {
         console.log("No file selected");
       }
