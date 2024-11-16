@@ -9,7 +9,7 @@ import { UserPoints } from "@/components/UserPoints";
 
 const Dashboard = async () => {
   const user = await getUser();
-  const email = user.email;
+  const email = user?.email;
   const md3Response = await fetchUserMd3s(email!);
   const md3Approved = md3Response?.md3s.filter(
     (md3: Md3) => md3.state === "approved"
