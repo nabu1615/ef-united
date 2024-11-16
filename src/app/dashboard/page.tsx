@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 import { fetchPeople, fetchUserMd3s } from "@/utils/api";
 import React, { Fragment } from "react";
 import Md3List from "@/components/Md3List";
@@ -15,6 +16,19 @@ const Dashboard = async () => {
   const md3Approved = md3s?.filter((md3: Md3) => md3.state === "approved");
 
   const users = (await fetchPeople()) as User[];
+=======
+import React, { Fragment } from "react";
+import Md3List from "@/components/Md3List";
+import { Md3, Team, User } from "@/types/api";
+import CreateMd3 from "@/components/CreateMd3";
+import { getUser } from "@/server/get-user";
+import { UserNotFound } from "@/components/UserNotFound";
+
+const Dashboard = async () => {
+  const user = await getUser();
+  const md3s = user?.team?.md3S as Md3[];
+  const users = (await getPeople()) as User[];
+>>>>>>> Stashed changes
 
   if (!user) {
     return <div>Person not found</div>;
@@ -40,3 +54,7 @@ const Dashboard = async () => {
 };
 
 export default Dashboard;
+function getPeople(): User[] | PromiseLike<User[]> {
+  throw new Error("Function not implemented.");
+}
+

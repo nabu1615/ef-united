@@ -40,6 +40,10 @@ import { UploadFile } from "./UploadFile";
 import { useToast } from "./ui/use-toast";
 import { Toaster } from "./ui/toaster";
 import { createMatch, createMd3 } from "@/utils/api";
+<<<<<<< Updated upstream
+=======
+import Image from "next/image";
+>>>>>>> Stashed changes
 
 const formErrors = {
   away_user: "Selecciona un equipo",
@@ -97,7 +101,14 @@ const CreateMd3 = ({ user, users }: { user: User; users: User[] }) => {
   const [showMatchForm, setShowMatchForm] = useState(false);
   const [createMd3Loader, setCreateMd3Loader] = useState(false);
   const [open, setOpen] = useState(false);
+<<<<<<< Updated upstream
   const [uploadedFileId, setUploadedFileId] = useState("");
+=======
+  const [uploadedFile, setUploadedFile] = useState({
+    id: "",
+    url: "",
+  });
+>>>>>>> Stashed changes
   const { toast } = useToast();
 
   const penalsRequired = useCallback(() => {
@@ -196,6 +207,7 @@ const CreateMd3 = ({ user, users }: { user: User; users: User[] }) => {
     if (md3Done) {
       setShowMatchForm(false);
 
+<<<<<<< Updated upstream
       if (uploadedFileId.length > 0) {
         createMatchHandler(matches, user)
           .then(async (matchesIds) => {
@@ -218,13 +230,34 @@ const CreateMd3 = ({ user, users }: { user: User; users: User[] }) => {
                 users
               );
               console.log("MD3 creado exitosamente:", md3Response);
+=======
+      if (uploadedFile.id) {
+        createMatchHandler(matches, user)
+          .then(async (matchesIds) => {
+            // Crear el MD3
+            try {
+              const users = [user?._id, awayUser?._id];
+              const md3Response = await createMd3(
+                uploadedFile.id,
+                matchesIds,
+                users
+              );
+              console.log("MD3 creado exitosamente.");
+>>>>>>> Stashed changes
               setCreateMd3Loader(false);
             } catch (error) {
               console.log("Error creating MD3:", error);
             }
 
             setMd3Done(false);
+<<<<<<< Updated upstream
             setUploadedFileId("");
+=======
+            setUploadedFile({
+              id: "",
+              url: "",
+            });
+>>>>>>> Stashed changes
             setOpen(false);
             setMatches([]);
             setAwayUser({
@@ -304,6 +337,7 @@ const CreateMd3 = ({ user, users }: { user: User; users: User[] }) => {
             <DialogDescription className="py-2 text-left my-4">
               Porfavor selecciona el rival y el resultado de los partidos.
             </DialogDescription>
+<<<<<<< Updated upstream
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)}>
                 {matches.length < 1 && (
@@ -445,9 +479,63 @@ const CreateMd3 = ({ user, users }: { user: User; users: User[] }) => {
                               required={awayScore === homeScore}
                             >
                               <FormItem className="flex items-center space-x-3 space-y-0">
+=======
+
+            {!createMd3Loader && !uploadedFile.url && (
+              <UploadFile setUploadedFile={setUploadedFile} />
+            )}
+            {uploadedFile.url && (
+              <div className="mt-2 mb-6">
+                <h5 className="text-sm text-left font-medium mb-4 my-2">
+                  Evidencia
+                </h5>
+                <Image
+                  src={uploadedFile.url}
+                  alt="evidence"
+                  width={0}
+                  height={0}
+                  sizes="100vw"
+                  style={{ width: "100%", height: "auto" }}
+                />
+              </div>
+            )}
+            {uploadedFile.url && (
+              <>
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)}>
+                    {matches.length < 1 && (
+                      <div className="grid gap-2">
+                        <FormField
+                          control={form.control}
+                          name="away_user"
+                          render={({ field }) => (
+                            <FormItem className="my-2">
+                              <FormLabel className="py-2 text-left w-full block">
+                                Selecciona equipo rival
+                              </FormLabel>
+                              <Select
+                                onValueChange={(value) => {
+                                  field.onChange(value);
+                                  const getUser = users.find(
+                                    (u) => u._id === value
+                                  );
+
+                                  setAwayUser({
+                                    _id: getUser?._id || "",
+                                    name: getUser?.name || "",
+                                    userName: getUser?.userName || "",
+                                  });
+                                  setShowMatchForm(true);
+                                }}
+                                disabled={matches.length > 0}
+                                defaultValue={field.value}
+                                value={field.value}
+                              >
+>>>>>>> Stashed changes
                                 <FormControl>
                                   <RadioGroupItem value="home" />
                                 </FormControl>
+<<<<<<< Updated upstream
                                 <FormLabel className="font-normal">
                                   {user?.name} Ganá por penales / Rival no pone
                                   penales
@@ -485,6 +573,27 @@ const CreateMd3 = ({ user, users }: { user: User; users: User[] }) => {
                         form.reset();
                         setMatches([]);
                       }}
+=======
+                                <SelectContent>
+                                  {filteredTeams.map((t) => (
+                                    <SelectItem key={t._id} value={t._id}>
+                                      {t.name} - {t.userName}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage className="text-xs" />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    )}
+
+                    <div
+                      className={`${
+                        showMatchForm ? "block" : "hidden"
+                      } bg-slate-200/50 my-2 rounded-md p-4`}
+>>>>>>> Stashed changes
                     >
                       Empezar de nuevo
                     </Button>

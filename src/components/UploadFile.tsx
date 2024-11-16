@@ -43,9 +43,17 @@ export const UploadFile = ({
       setIsLoading(true);
 
       if (file) {
+<<<<<<< Updated upstream
         const id = await uploadFileHandler(file[0]);
         setUploadedFileId(id);
         console.log("File uploaded successfully", id);
+=======
+        const response = await uploadFileHandler(file[0]);
+        setUploadedFile({
+          id: response._id,
+          url: response.url,
+        });
+>>>>>>> Stashed changes
       } else {
         console.log("No file selected");
       }
