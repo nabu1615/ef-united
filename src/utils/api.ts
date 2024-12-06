@@ -44,6 +44,41 @@ function generateRandomKey() {
   return Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
 }
 
+export async function fetchTeams() {
+  try {
+    const teams = await client.fetch(`
+    *[_type == "person"] | order(name asc) {
+      _id,
+      name,
+      md3s[]-> {
+        _id,
+        state,
+        matches[]-> {
+          _id,
+          homeUser-> {
+            _id,
+            name,
+            userName
+          },
+          awayUser-> {
+            _id,
+            name,
+            userName
+          },
+          awayScore,
+          homeScore,
+          penals
+        }
+      }
+    }
+      `);
+    return teams;
+  } catch (error) {
+    console.error("Error fetching teams:", error);
+    return null;
+  }
+}
+
 export async function fetchUserMd3s(email: string) {
   try {
     const md3s = await client.fetch(

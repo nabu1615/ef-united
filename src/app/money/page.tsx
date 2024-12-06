@@ -2,34 +2,45 @@ import React from "react";
 import { Team, columns } from "../../components/columns";
 import { DataTable } from "../../components/data-table";
 import { getUserMoney } from "@/utils/utils";
+import { fetchTeams } from "@/utils/api";
+import { Md3 } from "@/types/api";
 
 const Money = async () => {
-  // const teamsMd3s = await getTeamsMD3s();
+  const people = await fetchTeams();
 
-  // const data =
-  //   teamsMd3s &&
-  //   teamsMd3s.teams.map((team: any): Team => {
-  //     const teamId = team.id;
-  //     const formatter = new Intl.NumberFormat("en-US", {
-  //       style: "currency",
-  //       currency: "USD",
-  //     });
+  const data =
+    people &&
+    people.map((person: any): any => {
+      const userId = person._id;
+      const formatter = new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+      });
 
-  //     const money = getUserMoney(team.md3S, teamId);
+      const approvedMd3s = person?.md3s?.filter(
+        (md3: Md3) => md3.state === "approved"
+      );
 
-  //     return {
-  //       name: team.name || "",
-  //       money: formatter.format(money),
-  //     };
-  //   });
+      const money = getUserMoney(approvedMd3s, userId);
 
-  return <div>No se encontraron resultados</div>;
+      return {
+        name: person?.name || "",
+        money: formatter.format(money),
+      };
+    });
 
-  // return (
-  //   <div className="container mx-auto py-10">
-  //     <DataTable columns={columns} data={data || []} />
-  //   </div>
-  // );
+  const sortedData = data.sort((a: any, b: any) => {
+    // Convertir el dinero a números eliminando el signo $ y las comas
+    const moneyA = parseFloat(a.money.replace(/[$,]/g, ""));
+    const moneyB = parseFloat(b.money.replace(/[$,]/g, ""));
+    return moneyB - moneyA; // Ordenar de mayor a menor
+  });
+
+  return (
+    <div className="container mx-auto py-10">
+      <DataTable columns={columns} data={sortedData || []} />
+    </div>
+  );
 };
 
 export default Money;

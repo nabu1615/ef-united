@@ -1,5 +1,6 @@
 export const getUserMoney = (md3S: any, userId: any) => {
   let total = 0;
+
   md3S?.forEach((md3: any) => {
     md3.matches.forEach((match: any) => {
       if (match.homeUser._id === userId) {
