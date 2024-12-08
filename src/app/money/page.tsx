@@ -17,9 +17,9 @@ const Money = async () => {
         currency: "USD",
       });
 
-      const approvedMd3s = person?.md3s?.filter(
-        (md3: Md3) => md3.state === "approved"
-      );
+      const approvedMd3s = person?.md3s?.filter((md3: Md3) => {
+        return md3.state === "approved";
+      });
 
       const money = getUserMoney(approvedMd3s, userId);
 
@@ -30,10 +30,9 @@ const Money = async () => {
     });
 
   const sortedData = data.sort((a: any, b: any) => {
-    // Convertir el dinero a números eliminando el signo $ y las comas
     const moneyA = parseFloat(a.money.replace(/[$,]/g, ""));
     const moneyB = parseFloat(b.money.replace(/[$,]/g, ""));
-    return moneyB - moneyA; // Ordenar de mayor a menor
+    return moneyB - moneyA;
   });
 
   return (

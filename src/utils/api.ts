@@ -46,32 +46,35 @@ function generateRandomKey() {
 
 export async function fetchTeams() {
   try {
-    const teams = await client.fetch(`
-    *[_type == "person"] | order(name asc) {
-      _id,
-      name,
-      md3s[]-> {
+    const teams = await client.fetch(
+      `
+      *[_type == "person"] | order(name asc) {
         _id,
-        state,
-        matches[]-> {
+        name,
+        md3s[]-> {
           _id,
-          homeUser-> {
+          state,
+          matches[]-> {
             _id,
-            name,
-            userName
-          },
-          awayUser-> {
-            _id,
-            name,
-            userName
-          },
-          awayScore,
-          homeScore,
-          penals
+            homeUser-> {
+              _id,
+              name,
+              userName
+            },
+            awayUser-> {
+              _id,
+              name,
+              userName
+            },
+            awayScore,
+            homeScore,
+            penals
+          }
         }
       }
-    }
-      `);
+    `,
+      { next: { revalidate: 60 } as any } // Revalidate every 60 seconds
+    );
     return teams;
   } catch (error) {
     console.error("Error fetching teams:", error);
