@@ -21,36 +21,22 @@ const Dashboard = async () => {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen w-screen">
-      <div className="flex flex-col items-center justify-center md:flex-row">
-        <img src="/revisando-1.jpg" alt="" className="w-1/2 h-auto md:w-1/3" />
-        <img src="/revisando-2.jpg" alt="" className="w-1/2 h-auto md:w-1/3" />
+    <Fragment>
+      <div className="bg-slate-100 px-6 rounded-xl w-full md:w-3/4 py-8">
+        <UserPoints md3Approved={md3Approved} />
+        <div className="flex w-full justify-between items-center mb-10 mt-4">
+          <h2 className="my-4">🎮️ MD3 Jugados y Aprobados</h2>
+
+          {user && users && <CreateMd3 user={user} users={users} />}
+        </div>
+
+        {md3Approved &&
+          md3Approved.map((md3: Md3, index: number) => {
+            return <Md3List key={index} md3s={md3} />;
+          })}
       </div>
-
-      <h1 className="text-xl font-bold text-center my-4 mx-8">
-        Estamos revisando los MD3s, por favor vuelva en unos dias.
-      </h1>
-    </div>
+    </Fragment>
   );
-
-  // return (
-  //   <Fragment>
-  //     <div className="bg-slate-100 px-6 rounded-xl w-full md:w-3/4 py-8">
-
-  //       <UserPoints md3Approved={md3Approved} />
-  //       <div className="flex w-full justify-between items-center mb-10 mt-4">
-  //         <h2 className="my-4">🎮️ MD3 Jugados y Aprobados</h2>
-
-  //         {user && users && <CreateMd3 user={user} users={users} />}
-  //       </div>
-
-  //       {md3Approved &&
-  //         md3Approved.map((md3: Md3, index: number) => {
-  //           return <Md3List key={index} md3s={md3} />;
-  //         })}
-  //     </div>
-  //   </Fragment>
-  // );
 };
 
 export default Dashboard;

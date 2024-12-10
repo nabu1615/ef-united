@@ -11,7 +11,6 @@ const inter = Inter({ subsets: ["latin"] });
 
 // Globals
 import "./globals.css";
-import { Fragment } from "react";
 
 export const metadata: Metadata = {
   title: "EF United",
@@ -23,8 +22,6 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const mantenance = process.env.NEXT_PUBLIC_TURN_OFF_APP;
-
   return (
     <html lang="en">
       <head>
