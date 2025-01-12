@@ -54,6 +54,7 @@ export async function fetchTeams() {
         md3s[]-> {
           _id,
           state,
+          _createdAt,
           matches[]-> {
             _id,
             homeUser-> {
