@@ -11,7 +11,7 @@ const Money = async () => {
   const data =
     people &&
     people.map((person: any): any => {
-      const userId = person._id;
+      const userId = person.documentId;
       const formatter = new Intl.NumberFormat("en-US", {
         style: "currency",
         currency: "USD",

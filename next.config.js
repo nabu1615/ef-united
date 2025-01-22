@@ -1,4 +1,5 @@
 /** @type {import('next').NextConfig} */
+
 const nextConfig = {
   images: {
     domains: [
@@ -6,6 +7,7 @@ const nextConfig = {
       "ap-south-1.graphassets.com",
       "cdn.sanity.io",
       "via.placeholder.com",
+      "localhost",
     ],
   },
 };
