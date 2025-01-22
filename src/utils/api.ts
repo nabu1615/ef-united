@@ -1,6 +1,5 @@
+import { query } from "@/lib/strapi";
 import { client } from "@/sanity/lib/client";
-import { User } from "@/types/api";
-import { GraphQLClient, gql, request } from "graphql-request";
 
 interface CreateMatchParams {
   homeUserId: string;
@@ -10,113 +9,18 @@ interface CreateMatchParams {
   penals: string;
 }
 
-export async function fetchPeople() {
-  try {
-    const people = await client.fetch(`
-    *[_type == "person"] | order(name asc) {
-      _id,
-      name,
-      email, 
-      userName
-    }
-      `);
-    return people;
-  } catch (error) {
-    console.error("Error fetching people:", error);
-    return null;
-  }
+export async function getPersonByEmail(email: string) {
+  return query(
+    `people?filters[email][$eq]=${email}&populate[md_3_s][populate][matches][populate]=homeUser&populate[md_3_s][populate][matches][populate]=awayUser`
+  ).then((res) => {
+    return res.data[0];
+  });
 }
 
-export async function fetchPersonByEmail(email: string) {
-  try {
-    const person = await client.fetch(
-      `*[_type == "person" && email == $email][0]`,
-      { email }
-    );
-    return person;
-  } catch (error) {
-    console.error("Error fetching person by email:", error);
-    return null;
-  }
-}
-
-function generateRandomKey() {
-  return Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
-}
-
-export async function fetchTeams() {
-  try {
-    const teams = await client.fetch(
-      `
-      *[_type == "person"] | order(name asc) {
-        _id,
-        name,
-        md3s[]-> {
-          _id,
-          state,
-          _createdAt,
-          matches[]-> {
-            _id,
-            homeUser-> {
-              _id,
-              name,
-              userName
-            },
-            awayUser-> {
-              _id,
-              name,
-              userName
-            },
-            awayScore,
-            homeScore,
-            penals
-          }
-        }
-      }
-    `,
-      { next: { revalidate: 60 } as any } // Revalidate every 60 seconds
-    );
-    return teams;
-  } catch (error) {
-    console.error("Error fetching teams:", error);
-    return null;
-  }
-}
-
-export async function fetchUserMd3s(email: string) {
-  try {
-    const md3s = await client.fetch(
-      `
-      *[_type == "person" && email == $email][0] {
-        "md3s": md3s[]->{
-          _id,
-          state,
-          matches[]-> {
-            _id,
-            homeUser-> {
-              _id,
-              name,
-              userName
-            },
-            awayUser-> {
-              _id,
-              name,
-              userName
-            },
-            awayScore,
-            homeScore,
-            penals
-          }
-        }
-      }
-      `,
-      { email }
-    );
-    return md3s;
-  } catch (error) {
-    console.error("Error fetching MD3s:", error);
-    return null;
-  }
+export async function getPeople() {
+  return query(`people?sort=name`).then((res) => {
+    return res.data;
+  });
 }
 
 export async function createMatch({
@@ -126,67 +30,129 @@ export async function createMatch({
   awayScore,
   penals,
 }: CreateMatchParams) {
-  {
-    try {
-      const newMatch = await client.create({
-        _type: "match",
-        homeUser: { _type: "reference", _ref: homeUserId },
-        homeScore: homeScore,
-        awayUser: { _type: "reference", _ref: awayUserId },
-        awayScore: awayScore,
-        penals: penals,
-      });
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_STRAPI_HOST}/api/matches`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.NEXT_PUBLIC_STRAPI_TOKEN}`,
+        },
+        body: JSON.stringify({
+          data: {
+            homeUser: homeUserId,
+            homeScore: homeScore,
+            awayUser: awayUserId,
+            awayScore: awayScore,
+            penals: penals,
+          },
+        }),
+      }
+    );
 
-      console.log("Partido creado exitosamente:", newMatch);
-      return newMatch._id;
-    } catch (error) {
-      console.error("Error al crear el partido:", error);
+    if (!response.ok) {
+      throw new Error(`Error al crear el partido: ${response.statusText}`);
     }
+
+    const newMatch = await response.json();
+    console.log("Partido creado exitosamente:", newMatch);
+    return newMatch.data.id;
+  } catch (error) {
+    console.error("Error al crear el partido:", error);
   }
 }
 
 export async function createMd3(
   imageId: string,
   matchIds: string[],
-  users: string[]
+  users: string[],
+  md3sIds: string[]
 ) {
   try {
-    const newMd3 = await client.create({
-      _type: "md3",
-      evidence: imageId
-        ? { _type: "image", asset: { _type: "reference", _ref: imageId } }
-        : undefined,
-      state: "pending",
-    });
+    // Crear el nuevo MD3 en Strapi
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_STRAPI_HOST}/api/md-3s`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.NEXT_PUBLIC_STRAPI_TOKEN}`,
+        },
+        body: JSON.stringify({
+          data: {
+            evidence: imageId ? imageId : null,
+            state: "pending",
+            matches: [],
+          },
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Error al crear el MD3: ${response.statusText}`);
+    }
+
+    const newMd3 = await response.json();
+    const newMd3Id = newMd3.data.documentId;
 
     const homeUserId = users[0];
     const awayUserId = users[1];
 
+    const awayUser = await fetch(
+      `${process.env.NEXT_PUBLIC_STRAPI_HOST}/api/people/${awayUserId}?populate=md_3_s`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${process.env.NEXT_PUBLIC_STRAPI_TOKEN}`,
+        },
+      }
+    );
+
+    const awayUserData = await awayUser.json();
+    const currentMd3sAway = awayUserData.data.md_3_s || [];
+    const awayMd3sAwayIDs = currentMd3sAway.map((md3: any) => md3.documentId);
+
+    // Actualizar los usuarios y el MD3 con las referencias necesarias
     await Promise.all([
-      client
-        .patch(homeUserId)
-        .setIfMissing({ md3s: [] })
-        .append("md3s", [{ _type: "reference", _ref: newMd3._id }])
-        .commit({
-          autoGenerateArrayKeys: true,
+      fetch(`${process.env.NEXT_PUBLIC_STRAPI_HOST}/api/people/${homeUserId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.NEXT_PUBLIC_STRAPI_TOKEN}`,
+        },
+        body: JSON.stringify({
+          data: {
+            md_3_s: [...md3sIds, newMd3Id],
+          },
         }),
+      }),
 
-      client
-        .patch(awayUserId)
-        .setIfMissing({ md3s: [] })
-        .append("md3s", [{ _type: "reference", _ref: newMd3._id }])
-        .commit({
-          autoGenerateArrayKeys: true,
+      fetch(`${process.env.NEXT_PUBLIC_STRAPI_HOST}/api/people/${awayUserId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.NEXT_PUBLIC_STRAPI_TOKEN}`,
+        },
+        body: JSON.stringify({
+          data: {
+            md_3_s: [...awayMd3sAwayIDs, newMd3Id],
+          },
         }),
+      }),
 
-      client
-        .patch(newMd3._id)
-        .set({
-          matches: matchIds.map((id) => ({ _type: "reference", _ref: id })),
-        })
-        .commit({
-          autoGenerateArrayKeys: true,
+      fetch(`${process.env.NEXT_PUBLIC_STRAPI_HOST}/api/md-3s/${newMd3Id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.NEXT_PUBLIC_STRAPI_TOKEN}`,
+        },
+        body: JSON.stringify({
+          data: {
+            matches: matchIds,
+          },
         }),
+      }),
     ]);
 
     console.log("MD3 creado exitosamente:", newMd3);

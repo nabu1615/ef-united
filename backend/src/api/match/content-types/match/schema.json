@@ -1,0 +1,40 @@
+{
+  "kind": "collectionType",
+  "collectionName": "matches",
+  "info": {
+    "singularName": "match",
+    "pluralName": "matches",
+    "displayName": "Match",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "homeUser": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::person.person"
+    },
+    "awayUser": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::person.person"
+    },
+    "penals": {
+      "type": "enumeration",
+      "enum": [
+        "home",
+        "away"
+      ],
+      "required": false
+    },
+    "homeScore": {
+      "type": "integer"
+    },
+    "awayScore": {
+      "type": "integer"
+    }
+  }
+}

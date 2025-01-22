@@ -1,13 +1,14 @@
-export interface User {
-  _id: string;
-  name: string;
-  userName: string;
-  md3s: Md3[];
-}
-
 export interface Md3 {
+  documentId: string;
   matches: Match[];
   state: string;
+}
+
+export interface User {
+  documentId: string;
+  name: string;
+  userName: string;
+  md_3_s: Md3[];
 }
 
 export interface Match {

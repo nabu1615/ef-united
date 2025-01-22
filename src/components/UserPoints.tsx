@@ -10,14 +10,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-import { getUser } from "@/server/get-user";
 import { getUserMoney } from "@/utils/utils";
 
-export async function UserPoints({ md3Approved }: any) {
-  const user = await getUser();
-  const userId = user?._id;
-
-  const money = getUserMoney(md3Approved, userId);
+export async function UserPoints({ md3Approved, id }: any) {
+  const money = getUserMoney(md3Approved, id);
 
   const formatter = new Intl.NumberFormat("en-US", {
     style: "currency",

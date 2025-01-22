@@ -41,7 +41,7 @@ export const matchType = defineType({
   ],
   preview: {
     select: {
-      id: "_id",
+      id: "documentId",
     },
     prepare({ id }) {
       return {

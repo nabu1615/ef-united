@@ -30,7 +30,7 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { User } from "@/types/api";
+import { Md3, User } from "@/types/api";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -84,10 +84,12 @@ const CreateMd3 = ({ user, users }: { user: User; users: User[] }) => {
     resolver: resolver,
   });
 
-  const filteredTeams: User[] = users.filter((t) => t._id !== user?._id);
+  const filteredTeams: User[] = users.filter(
+    (t) => t.documentId !== user.documentId
+  );
   const [awayUser, setAwayUser] = useState({
     name: "",
-    _id: "",
+    documentId: "",
     userName: "",
   });
   const [matches, setMatches]: any = useState([]);
@@ -177,8 +179,8 @@ const CreateMd3 = ({ user, users }: { user: User; users: User[] }) => {
     // Manejo de promesas para cada partido
     for (const match of data) {
       const newMatchObj = {
-        homeUserId: user?._id,
-        awayUserId: awayUser._id,
+        homeUserId: user?.documentId,
+        awayUserId: awayUser.documentId,
         homeScore: Number(match.home_score),
         awayScore: Number(match.away_score),
         penals: match.penals,
@@ -203,14 +205,11 @@ const CreateMd3 = ({ user, users }: { user: User; users: User[] }) => {
       if (uploadedFile.id) {
         createMatchHandler(matches, user)
           .then(async (matchesIds) => {
+            const userMD3sIDs = user.md_3_s.map((md3: Md3) => md3.documentId);
             // Crear el MD3
             try {
-              const users = [user?._id, awayUser?._id];
-              const md3Response = await createMd3(
-                uploadedFile.id,
-                matchesIds,
-                users
-              );
+              const users = [user?.documentId, awayUser?.documentId];
+              await createMd3(uploadedFile.id, matchesIds, users, userMD3sIDs);
               console.log("MD3 creado exitosamente.");
               setCreateMd3Loader(false);
             } catch (error) {
@@ -225,7 +224,7 @@ const CreateMd3 = ({ user, users }: { user: User; users: User[] }) => {
             setOpen(false);
             setMatches([]);
             setAwayUser({
-              _id: "",
+              documentId: "",
               name: "",
               userName: "",
             });
@@ -278,7 +277,7 @@ const CreateMd3 = ({ user, users }: { user: User; users: User[] }) => {
           setMatches([]);
           setShowMatchForm(false);
           setAwayUser({
-            _id: "",
+            documentId: "",
             name: "",
             userName: "",
           });
@@ -339,11 +338,11 @@ const CreateMd3 = ({ user, users }: { user: User; users: User[] }) => {
                                 onValueChange={(value) => {
                                   field.onChange(value);
                                   const getUser = users.find(
-                                    (u) => u._id === value
+                                    (u) => u.documentId === value
                                   );
 
                                   setAwayUser({
-                                    _id: getUser?._id || "",
+                                    documentId: getUser?.documentId || "",
                                     name: getUser?.name || "",
                                     userName: getUser?.userName || "",
                                   });
@@ -360,7 +359,10 @@ const CreateMd3 = ({ user, users }: { user: User; users: User[] }) => {
                                 </FormControl>
                                 <SelectContent>
                                   {filteredTeams.map((t) => (
-                                    <SelectItem key={t._id} value={t._id}>
+                                    <SelectItem
+                                      key={t.documentId}
+                                      value={t.documentId}
+                                    >
                                       {t.name} - {t.userName}
                                     </SelectItem>
                                   ))}
@@ -404,8 +406,8 @@ const CreateMd3 = ({ user, users }: { user: User; users: User[] }) => {
                                       disabled={showPenals}
                                       onChange={(e) => {
                                         const value = e.target.value;
-
                                         field.onChange(e);
+
                                         setHomeScore(value as any);
                                       }}
                                     />
@@ -437,7 +439,6 @@ const CreateMd3 = ({ user, users }: { user: User; users: User[] }) => {
                                       disabled={showPenals}
                                       onChange={(e) => {
                                         const value = e.target.value;
-
                                         field.onChange(e);
                                         setAwayScore(value as any);
                                       }}

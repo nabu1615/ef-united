@@ -8,10 +8,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { uploadFileHandler } from "@/lib/uploadFile";
 import Loader from "./Loader";
-import { Form, FormControl, FormField, FormItem, FormMessage } from "./ui/form";
+import { Form, FormControl, FormField, FormItem } from "./ui/form";
 import Image from "next/image";
 
 let errorExists: any = null;
+const strapiHost = process.env.NEXT_PUBLIC_STRAPI_HOST;
 
 const formSchema = z.object({
   file: z.custom((value) => {
@@ -40,9 +41,13 @@ export const UploadFile = ({ setUploadedFile }: { setUploadedFile: any }) => {
 
       if (file) {
         const response = await uploadFileHandler(file[0]);
+        const { url, id } = response[0];
+
+        const fullUrl = `${strapiHost}${url}`;
+
         setUploadedFile({
-          id: response._id,
-          url: response.url,
+          id,
+          url: fullUrl,
         });
       } else {
         console.log("No file selected");

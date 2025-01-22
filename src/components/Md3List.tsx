@@ -1,8 +1,7 @@
-import { getUser } from "@/server/get-user";
 import { Match, Md3, User } from "@/types/api";
 import { Zen_Dots } from "next/font/google";
 import { Badge } from "@/components/ui/badge";
-import { fetchPeople } from "@/utils/api";
+import { getPeople } from "@/utils/api";
 
 const zenDots = Zen_Dots({
   subsets: ["latin"],
@@ -11,16 +10,21 @@ const zenDots = Zen_Dots({
 
 function getTeamUser(people: User[], teamId: string, defaultName: string) {
   return (
-    (people && people.find((person: any) => person._id === teamId)) || {
+    (people && people.find((person: any) => person.documentId === teamId)) || {
       name: defaultName,
     }
   );
 }
 
-const Md3List = async ({ md3s: { matches } }: { md3s: Md3 }) => {
-  const user = await getUser();
-  const people = await fetchPeople();
-  const userTeamId = user?._id;
+const Md3List = async ({
+  md3s: { matches },
+  user,
+}: {
+  md3s: Md3;
+  user: User;
+}) => {
+  const people = await getPeople();
+  const userTeamId = user?.documentId;
 
   if (!matches) {
     return <div>Md3 not found</div>;
@@ -28,13 +32,13 @@ const Md3List = async ({ md3s: { matches } }: { md3s: Md3 }) => {
 
   const whoWon = () => {
     const didUserWinMatch = (match: Match): boolean => {
-      if (match?.homeUser?._id === userTeamId) {
+      if (match?.homeUser?.documentId === userTeamId) {
         return (
           match?.homeScore > match?.awayScore ||
           (match?.homeScore === match?.awayScore && match?.penals === "home")
         );
       }
-      if (match?.awayUser?._id === userTeamId) {
+      if (match?.awayUser?.documentId === userTeamId) {
         // User lost the md3
         if (
           match?.awayScore > match?.homeScore ||
@@ -68,15 +72,25 @@ const Md3List = async ({ md3s: { matches } }: { md3s: Md3 }) => {
       }
       {matches.map((match: Match, index: number) => {
         const userHomeOrAway =
-          match?.homeUser?._id === userTeamId ? "home" : "away";
+          match?.homeUser?.documentId === userTeamId ? "home" : "away";
         const wonInPenals = match?.penals && match?.penals === userHomeOrAway;
         const homeUser =
           people &&
-          getTeamUser(people, match?.homeUser?._id, "Nombre Usuario Local");
+          getTeamUser(
+            people,
+            match?.homeUser?.documentId,
+            "Nombre Usuario Local"
+          );
+
+        console.log("homeUser", homeUser);
 
         const awayUser =
           people &&
-          getTeamUser(people, match?.awayUser?._id, "Nombre Usuario Visitante");
+          getTeamUser(
+            people,
+            match?.awayUser?.documentId,
+            "Nombre Usuario Visitante"
+          );
 
         return (
           <div

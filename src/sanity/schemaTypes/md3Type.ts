@@ -32,7 +32,7 @@ export const md3Type = defineType({
   ],
   preview: {
     select: {
-      id: "_id",
+      id: "documentId",
       state: "state",
     },
     prepare({ id, state }) {

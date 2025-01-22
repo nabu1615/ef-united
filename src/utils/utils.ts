@@ -3,7 +3,7 @@ export const getUserMoney = (md3S: any, userId: any) => {
 
   md3S?.forEach((md3: any) => {
     md3.matches.forEach((match: any) => {
-      if (match.homeUser._id === userId) {
+      if (match.homeUser.documentId === userId) {
         if (match.homeScore > match.awayScore) {
           total += 600;
         }
@@ -21,7 +21,7 @@ export const getUserMoney = (md3S: any, userId: any) => {
         }
       }
 
-      if (match.awayUser._id === userId) {
+      if (match.awayUser.documentId === userId) {
         if (match.homeScore > match.awayScore) {
           total += 100;
         }
