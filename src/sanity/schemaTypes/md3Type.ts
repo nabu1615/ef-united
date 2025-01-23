@@ -13,6 +13,7 @@ export const md3Type = defineType({
         list: [
           { title: "Pendiente", value: "pending" },
           { title: "Aprobado", value: "approved" },
+          { title: "Rechazado", value: "rejected" },
         ], // Lista de opciones
         layout: "radio", // Opcional: Esto cambia el tipo de selección a botones de radio
       },
@@ -29,6 +30,18 @@ export const md3Type = defineType({
       type: "array",
       of: [{ type: "reference", to: [{ type: "match" }] }],
     }),
+  ],
+  orderings: [
+    {
+      title: "Pendings first",
+      name: "pending",
+      by: [{ field: "state", direction: "desc" }],
+    },
+    {
+      title: "Approved first",
+      name: "approved",
+      by: [{ field: "state", direction: "asc" }],
+    },
   ],
   preview: {
     select: {
