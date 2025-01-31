@@ -1,6 +1,4 @@
 import { client } from "@/sanity/lib/client";
-import { User } from "@/types/api";
-import { GraphQLClient, gql, request } from "graphql-request";
 
 interface CreateMatchParams {
   homeUserId: string;
@@ -73,8 +71,7 @@ export async function fetchTeams() {
           }
         }
       }
-    `,
-      { next: { revalidate: 60 } as any } // Revalidate every 60 seconds
+    `
     );
     return teams;
   } catch (error) {
