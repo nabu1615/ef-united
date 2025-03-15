@@ -8,6 +8,8 @@ export interface User {
 export interface Md3 {
   matches: Match[];
   state: string;
+  _createdAt?: string;
+  _id?: string;
 }
 
 export interface Match {

@@ -17,7 +17,7 @@ function getTeamUser(people: User[], teamId: string, defaultName: string) {
   );
 }
 
-const Md3List = async ({ md3s: { matches, state } }: { md3s: Md3 }) => {
+const Md3List = async ({ md3s: { matches, state, _createdAt } }: { md3s: Md3 }) => {
   const user = await getUser();
   const people = await fetchPeople();
   const userTeamId = user?._id;
@@ -56,6 +56,16 @@ const Md3List = async ({ md3s: { matches, state } }: { md3s: Md3 }) => {
     return false;
   };
 
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('es-ES', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    }).format(date);
+  };
+
   return (
     <div className="md3 mb-4 rounded-xl bg-slate-200 relative">
       {
@@ -74,7 +84,9 @@ const Md3List = async ({ md3s: { matches, state } }: { md3s: Md3 }) => {
           </Badge>
         )
       }
+
       {matches.map((match: Match, index: number) => {
+        const isLastMatch = index === matches.length - 1;
         const userHomeOrAway =
           match?.homeUser?._id === userTeamId ? "home" : "away";
         const wonInPenals = match?.penals && match?.penals === userHomeOrAway;
@@ -137,6 +149,14 @@ const Md3List = async ({ md3s: { matches, state } }: { md3s: Md3 }) => {
                 </p>
               </div>
             </div>
+
+            {isLastMatch && _createdAt && (
+              <div className="col-span-3 flex justify-center">
+                <p className="text-xs font-light text-slate-400 italic">
+                  {formatDate(_createdAt)}
+                </p>
+              </div>
+            )}
           </div>
         );
       })}
