@@ -41,6 +41,10 @@ export async function UserPoints({ md3Approved }: any) {
         <div>
           <div className="text-2xl font-bold">{formattedNumber}</div>
         </div>
+        <CardDescription>
+          <strong>Nota:</strong> los MD3 que están pendientes no suman dinero al total
+          mostrado arriba.
+        </CardDescription>
         <div className=" flex items-center space-x-4 rounded-md border p-4">
           <BellRing />
           <div className="flex-1">
