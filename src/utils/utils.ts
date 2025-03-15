@@ -1,3 +1,18 @@
+/**
+ * Formatea una fecha en formato español (día de mes de año)
+ * @param dateString - String de fecha ISO
+ * @returns Fecha formateada en español
+ */
+export const formatDate = (dateString: string): string => {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  return new Intl.DateTimeFormat('es-ES', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  }).format(date);
+};
+
 export const getUserMoney = (md3S: any, userId: any) => {
   let total = 0;
 

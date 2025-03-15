@@ -3,6 +3,7 @@ import { Match, Md3, User } from "@/types/api";
 import { Zen_Dots } from "next/font/google";
 import { Badge } from "@/components/ui/badge";
 import { fetchPeople } from "@/utils/api";
+import { formatDate } from "@/utils/utils";
 
 const zenDots = Zen_Dots({
   subsets: ["latin"],
@@ -56,15 +57,6 @@ const Md3List = async ({ md3s: { matches, state, _createdAt } }: { md3s: Md3 }) 
     return false;
   };
 
-  const formatDate = (dateString: string) => {
-    if (!dateString) return "";
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('es-ES', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    }).format(date);
-  };
 
   return (
     <div className="md3 mb-4 rounded-xl bg-slate-200 relative">
