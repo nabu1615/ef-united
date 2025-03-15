@@ -11,8 +11,13 @@ const Dashboard = async () => {
   const user = await getUser();
   const email = user?.email;
   const md3Response = await fetchUserMd3s(email!);
-  const md3Approved = md3Response?.md3s?.filter(
+
+  const md3ApprovedAndPending = md3Response?.md3s?.filter(
     (md3: Md3) => md3.state !== "rejected"
+  );
+
+  const md3Approved = md3Response?.md3s?.filter(
+    (md3: Md3) => md3.state === "approved"
   );
   const users = (await fetchPeople()) as User[];
 
@@ -30,8 +35,8 @@ const Dashboard = async () => {
           {user && users && <CreateMd3 user={user} users={users} />}
         </div>
 
-        {md3Approved &&
-          md3Approved.map((md3: Md3, index: number) => {
+        {md3ApprovedAndPending &&
+          md3ApprovedAndPending.map((md3: Md3, index: number) => {
             return <Md3List key={index} md3s={md3} />;
           })}
       </div>
