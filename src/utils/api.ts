@@ -85,9 +85,10 @@ export async function fetchUserMd3s(email: string) {
     const md3s = await client.fetch(
       `
       *[_type == "person" && email == $email][0] {
-        "md3s": md3s[]->{
+        "md3s": md3s[]->| order(_createdAt desc) {
           _id,
           state,
+          _createdAt,
           matches[]-> {
             _id,
             homeUser-> {
