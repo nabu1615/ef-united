@@ -12,7 +12,7 @@ const Dashboard = async () => {
   const email = user?.email;
   const md3Response = await fetchUserMd3s(email!);
   const md3Approved = md3Response?.md3s?.filter(
-    (md3: Md3) => md3.state === "approved"
+    (md3: Md3) => md3.state !== "rejected"
   );
   const users = (await fetchPeople()) as User[];
 
@@ -25,7 +25,7 @@ const Dashboard = async () => {
       <div className="bg-slate-100 px-6 rounded-xl w-full md:w-3/4 py-8">
         <UserPoints md3Approved={md3Approved} />
         <div className="flex w-full justify-between items-center mb-10 mt-4">
-          <h2 className="my-4">🎮️ MD3 Jugados y Aprobados</h2>
+          <h2 className="my-4">🎮️ MD3 Jugados</h2>
 
           {user && users && <CreateMd3 user={user} users={users} />}
         </div>
