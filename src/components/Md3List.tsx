@@ -3,6 +3,7 @@ import { Match, Md3, User } from "@/types/api";
 import { Zen_Dots } from "next/font/google";
 import { Badge } from "@/components/ui/badge";
 import { fetchPeople } from "@/utils/api";
+import { formatDate } from "@/utils/utils";
 
 const zenDots = Zen_Dots({
   subsets: ["latin"],
@@ -17,7 +18,7 @@ function getTeamUser(people: User[], teamId: string, defaultName: string) {
   );
 }
 
-const Md3List = async ({ md3s: { matches } }: { md3s: Md3 }) => {
+const Md3List = async ({ md3s: { matches, state, _createdAt } }: { md3s: Md3 }) => {
   const user = await getUser();
   const people = await fetchPeople();
   const userTeamId = user?._id;
@@ -56,17 +57,28 @@ const Md3List = async ({ md3s: { matches } }: { md3s: Md3 }) => {
     return false;
   };
 
+
   return (
     <div className="md3 mb-4 rounded-xl bg-slate-200 relative">
       {
-        <Badge
-          className="absolute -top-2 -left-2"
-          variant={whoWon() ? "success" : "destructive"}
-        >
-          {whoWon() ? "Ganado" : "Perdido"}
-        </Badge>
+        state === "pending" ? (
+          <Badge
+            className="absolute -top-2 -left-2 bg-orange-500 hover:bg-orange-600"
+          >
+            Pendiente
+          </Badge>
+        ) : (
+          <Badge
+            className="absolute -top-2 -left-2"
+            variant={whoWon() ? "success" : "destructive"}
+          >
+            {whoWon() ? "Ganado" : "Perdido"}
+          </Badge>
+        )
       }
+
       {matches.map((match: Match, index: number) => {
+        const isLastMatch = index === matches.length - 1;
         const userHomeOrAway =
           match?.homeUser?._id === userTeamId ? "home" : "away";
         const wonInPenals = match?.penals && match?.penals === userHomeOrAway;
@@ -129,6 +141,14 @@ const Md3List = async ({ md3s: { matches } }: { md3s: Md3 }) => {
                 </p>
               </div>
             </div>
+
+            {isLastMatch && _createdAt && (
+              <div className="col-span-3 flex justify-center">
+                <p className="text-xs font-light text-slate-400 italic">
+                  {formatDate(_createdAt)}
+                </p>
+              </div>
+            )}
           </div>
         );
       })}
