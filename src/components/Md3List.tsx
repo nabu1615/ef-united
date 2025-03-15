@@ -17,7 +17,7 @@ function getTeamUser(people: User[], teamId: string, defaultName: string) {
   );
 }
 
-const Md3List = async ({ md3s: { matches } }: { md3s: Md3 }) => {
+const Md3List = async ({ md3s: { matches, state } }: { md3s: Md3 }) => {
   const user = await getUser();
   const people = await fetchPeople();
   const userTeamId = user?._id;
@@ -59,12 +59,20 @@ const Md3List = async ({ md3s: { matches } }: { md3s: Md3 }) => {
   return (
     <div className="md3 mb-4 rounded-xl bg-slate-200 relative">
       {
-        <Badge
-          className="absolute -top-2 -left-2"
-          variant={whoWon() ? "success" : "destructive"}
-        >
-          {whoWon() ? "Ganado" : "Perdido"}
-        </Badge>
+        state === "pending" ? (
+          <Badge
+            className="absolute -top-2 -left-2 bg-orange-500 hover:bg-orange-600"
+          >
+            Pendiente
+          </Badge>
+        ) : (
+          <Badge
+            className="absolute -top-2 -left-2"
+            variant={whoWon() ? "success" : "destructive"}
+          >
+            {whoWon() ? "Ganado" : "Perdido"}
+          </Badge>
+        )
       }
       {matches.map((match: Match, index: number) => {
         const userHomeOrAway =
