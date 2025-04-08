@@ -1,13 +1,13 @@
+"use client";
+
 import Login from "@/components/Login";
 import { Fragment } from "react";
+//import { deleteMd3s, deleteMatches } from "@/sanity/lib/deleteMd3s";
 
 export default function Home() {
   return (
     <Fragment>
-      <h1 className="text-3xl font-bold underline">
-        Estamos revisando los MD3s
-      </h1>
-      {/* <Login /> */}
+      <Login />
     </Fragment>
   );
 }
