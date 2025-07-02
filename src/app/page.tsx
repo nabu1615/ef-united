@@ -1,8 +1,8 @@
 "use client";
 
+import DeleteMd3s from "@/components/delete-md3s";
 import Login from "@/components/Login";
 import { Fragment } from "react";
-//import { deleteMd3s, deleteMatches } from "@/sanity/lib/deleteMd3s";
 
 export default function Home() {
   return (
