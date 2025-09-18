@@ -8,8 +8,6 @@ import { Md3 } from "@/types/api";
 const Money = async () => {
   const people = await fetchTeams();
 
-  console.log("people", people);
-
   const data =
     people &&
     people.map((person: any): any => {
