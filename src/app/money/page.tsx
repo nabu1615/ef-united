@@ -37,8 +37,8 @@ const Money = async () => {
 
   return (
     <div className="container mx-auto py-10">
-      Estamos revisando sus MD3s, vuelva luego.
-      {/* <DataTable columns={columns} data={sortedData || []} /> */}
+      {/* Estamos revisando sus MD3s, vuelva luego. */}
+      <DataTable columns={columns} data={sortedData || []} />
     </div>
   );
 };

@@ -1,5 +1,8 @@
 import { client } from "@/sanity/lib/client";
 
+// Use a non-CDN client for GETs that must be fresh (no cache)
+const freshClient = client.withConfig({ useCdn: false });
+
 interface CreateMatchParams {
   homeUserId: string;
   homeScore: number;
@@ -10,7 +13,7 @@ interface CreateMatchParams {
 
 export async function fetchPeople() {
   try {
-    const people = await client.fetch(`
+    const people = await freshClient.fetch(`
     *[_type == "person"] | order(name asc) {
       _id,
       name,
@@ -27,7 +30,7 @@ export async function fetchPeople() {
 
 export async function fetchPersonByEmail(email: string) {
   try {
-    const person = await client.fetch(
+    const person = await freshClient.fetch(
       `*[_type == "person" && email == $email][0]`,
       { email }
     );
@@ -44,7 +47,7 @@ function generateRandomKey() {
 
 export async function fetchTeams() {
   try {
-    const teams = await client.fetch(
+    const teams = await freshClient.fetch(
       `
       *[_type == "person"] | order(name asc) {
         _id,
@@ -82,7 +85,7 @@ export async function fetchTeams() {
 
 export async function fetchUserMd3s(email: string) {
   try {
-    const md3s = await client.fetch(
+    const md3s = await freshClient.fetch(
       `
       *[_type == "person" && email == $email][0] {
         "md3s": md3s[]->| order(_createdAt desc) {
@@ -196,9 +199,8 @@ export async function createMd3(
 
 export async function uploadFileHandler(file: any) {
   try {
-    client.assets.upload("image", file).then((res) => {
-      return res.assetId;
-    });
+    const res = await client.assets.upload("image", file);
+    return res?.asset?._ref || res?.assetId || res?.asset?.id || null;
   } catch (error) {
     console.error("Error uploading file:", error);
   }
