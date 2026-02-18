@@ -11,7 +11,7 @@ async function deleteMd3s() {
 
       // Remove references from Person documents
       const persons = await client.fetch(
-        `*[_type == "person" && references("${md3._id}")]`
+        `*[_type == "person" && references("${md3._id}")]`,
       );
       for (const person of persons) {
         await client
@@ -49,4 +49,22 @@ export default function DeleteMd3s() {
       <button onClick={DeleteMatches}>Delete Matches</button>
     </>
   );
+}
+
+export async function deleteAllMd3s() {
+  try {
+    const md3s = await client.fetch('*[_type == "md3"]{_id}');
+
+    const transaction = client.transaction();
+
+    for (const md3 of md3s) {
+      transaction.patch(md3._id, (p) => p.unset(["matches"]));
+      transaction.delete(md3._id);
+    }
+
+    await transaction.commit();
+    console.log("All MD3s deleted.");
+  } catch (error) {
+    console.error("Error:", error);
+  }
 }

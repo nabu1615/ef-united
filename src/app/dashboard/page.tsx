@@ -27,7 +27,7 @@ const Dashboard = async () => {
 
   return (
     <Fragment>
-      {/* <div className="bg-slate-100 px-6 rounded-xl w-full md:w-3/4 py-8">
+      <div className="bg-slate-100 px-6 rounded-xl w-full md:w-3/4 py-8">
         <UserPoints md3Approved={md3Approved} />
         <div className="flex w-full justify-between items-center mb-10 mt-4">
           <h2 className="my-4">🎮️ MD3 Jugados</h2>
@@ -39,7 +39,7 @@ const Dashboard = async () => {
           md3ApprovedAndPending.map((md3: Md3, index: number) => {
             return <Md3List key={index} md3s={md3} />;
           })}
-      </div> */}
+      </div>
     </Fragment>
   );
 };
