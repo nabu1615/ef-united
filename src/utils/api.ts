@@ -32,7 +32,7 @@ export async function fetchPersonByEmail(email: string) {
   try {
     const person = await freshClient.fetch(
       `*[_type == "person" && email == $email][0]`,
-      { email }
+      { email },
     );
     return person;
   } catch (error) {
@@ -52,6 +52,8 @@ export async function fetchTeams() {
       *[_type == "person"] | order(name asc) {
         _id,
         name,
+        userName,
+        email,
         md3s[]-> {
           _id,
           state,
@@ -74,7 +76,7 @@ export async function fetchTeams() {
           }
         }
       }
-    `
+    `,
     );
     return teams;
   } catch (error) {
@@ -111,7 +113,7 @@ export async function fetchUserMd3s(email: string) {
         }
       }
       `,
-      { email }
+      { email },
     );
     return md3s;
   } catch (error) {
@@ -149,7 +151,7 @@ export async function createMatch({
 export async function createMd3(
   imageId: string,
   matchIds: string[],
-  users: string[]
+  users: string[],
 ) {
   try {
     const newMd3 = await client.create({

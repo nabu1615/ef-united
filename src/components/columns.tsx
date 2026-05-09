@@ -13,6 +13,10 @@ export const columns: ColumnDef<Team>[] = [
     header: "Nombre de equipo",
   },
   {
+    accessorKey: "userName",
+    header: "Nombre de usuario",
+  },
+  {
     accessorKey: "money",
     header: "Dinero MD3s",
   },

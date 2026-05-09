@@ -1,5 +1,5 @@
 import React from "react";
-import { Team, columns } from "../../components/columns";
+import { columns } from "../../components/columns";
 import { DataTable } from "../../components/data-table";
 import { getUserMoney } from "@/utils/utils";
 import { fetchTeams } from "@/utils/api";
@@ -25,6 +25,7 @@ const Money = async () => {
 
       return {
         name: person?.name || "",
+        userName: person?.userName || "",
         money: formatter.format(money),
       };
     });
@@ -37,8 +38,8 @@ const Money = async () => {
 
   return (
     <div className="container mx-auto py-10">
-      Estamos revisando sus MD3s, vuelva luego.
-      {/* <DataTable columns={columns} data={sortedData || []} /> */}
+      {/* Estamos revisando sus MD3s, vuelva luego. */}
+      <DataTable columns={columns} data={sortedData || []} />
     </div>
   );
 };
