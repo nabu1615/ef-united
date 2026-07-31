@@ -12,11 +12,11 @@ import {
 export default function Home() {
   return (
     <Fragment>
-      <Login />
-      {/*
+      {/* <Login /> */}
+
       <div className="m-3">
-         <h1>Estamos revisando sus MD3s, vuelva luego.</h1> 
-        <button onClick={deleteMd3s} className="mr-2">
+        <h1>Estamos revisando sus MD3s, vuelva luego.</h1>
+        {/* <button onClick={deleteMd3s} className="mr-2">
           Delete MD3s
         </button>
         <button onClick={deleteMatches}>Delete Matches</button>
@@ -26,9 +26,8 @@ export default function Home() {
         </button>
         <button onClick={deleteAllMatches} className="ml-2">
           Delete All Matches
-        </button>
+        </button> */}
       </div>
-      */}
     </Fragment>
   );
 }
