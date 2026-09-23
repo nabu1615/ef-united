@@ -13,6 +13,8 @@ import {
 import { getUser } from "@/server/get-user";
 import { getUserMoney } from "@/utils/utils";
 
+const MAX_USER_MONEY = 15000;
+
 export async function UserPoints({ md3Approved }: any) {
   const user = await getUser();
   const userId = user?._id;
@@ -26,7 +28,7 @@ export async function UserPoints({ md3Approved }: any) {
 
   const formattedNumber = formatter.format(money);
 
-  const possibleToEarn = 40000 - money;
+  const possibleToEarn = MAX_USER_MONEY - money;
   const userCanEarn = possibleToEarn > 0;
 
   return (
