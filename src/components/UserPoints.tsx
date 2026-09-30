@@ -26,7 +26,7 @@ export async function UserPoints({ md3Approved }: any) {
 
   const formattedNumber = formatter.format(money);
 
-  const possibleToEarn = 40000 - money;
+  const possibleToEarn = 20000 - money;
   const userCanEarn = possibleToEarn > 0;
 
   return (
@@ -42,8 +42,8 @@ export async function UserPoints({ md3Approved }: any) {
           <div className="text-2xl font-bold">{formattedNumber}</div>
         </div>
         <CardDescription>
-          <strong>Nota:</strong> los MD3 que están pendientes no suman dinero al total
-          mostrado arriba.
+          <strong>Nota:</strong> los MD3 que están pendientes no suman dinero al
+          total mostrado arriba.
         </CardDescription>
         <div className=" flex items-center space-x-4 rounded-md border p-4">
           <BellRing />

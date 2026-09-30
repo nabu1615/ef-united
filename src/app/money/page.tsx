@@ -21,7 +21,7 @@ const Money = async () => {
         return md3.state === "approved";
       });
 
-      const money = getUserMoney(approvedMd3s, userId);
+      let money = getUserMoney(approvedMd3s, userId);
 
       return {
         name: person?.name || "",
