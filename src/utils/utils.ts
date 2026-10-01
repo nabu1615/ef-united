@@ -6,10 +6,10 @@
 export const formatDate = (dateString: string): string => {
   if (!dateString) return "";
   const date = new Date(dateString);
-  return new Intl.DateTimeFormat('es-ES', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
+  return new Intl.DateTimeFormat("es-ES", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   }).format(date);
 };
 
@@ -20,36 +20,36 @@ export const getUserMoney = (md3S: any, userId: any) => {
     md3?.matches?.forEach((match: any) => {
       if (match.homeUser._id === userId) {
         if (match.homeScore > match.awayScore) {
-          total += 600;
+          total += 300;
         }
 
         if (match.homeScore === match.awayScore) {
           if (match.penals === "home") {
-            total += 600;
-          } else if (match.penals === "away") {
             total += 300;
+          } else if (match.penals === "away") {
+            total += 150;
           }
         }
 
         if (match.awayScore > match.homeScore) {
-          total += 100;
+          total += 50;
         }
       }
 
       if (match.awayUser._id === userId) {
         if (match.homeScore > match.awayScore) {
-          total += 100;
+          total += 50;
         }
 
         if (match.awayScore > match.homeScore) {
-          total += 600;
+          total += 300;
         }
 
         if (match.awayScore === match.homeScore) {
           if (match.penals === "away") {
-            total += 600;
-          } else if (match.penals === "home") {
             total += 300;
+          } else if (match.penals === "home") {
+            total += 150;
           }
         }
       }
